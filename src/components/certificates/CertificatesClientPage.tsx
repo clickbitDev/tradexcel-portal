@@ -213,8 +213,8 @@ export function CertificatesClientPage() {
     const [draft, setDraft] = useState<CertificateDraftPayload | null>(null);
     const [issueDate, setIssueDate] = useState('');
     const [standard, setStandard] = useState(DEFAULT_CERTIFICATE_STANDARD);
-    const [scope, setScope] = useState('');
-    const [auditRef, setAuditRef] = useState('');
+    const [qualificationName, setQualificationName] = useState('');
+    const [qualificationCode, setQualificationCode] = useState('');
     const [includeTranscript, setIncludeTranscript] = useState(false);
     const [transcriptRows, setTranscriptRows] = useState<CertificateTranscriptRow[]>([]);
 
@@ -396,8 +396,8 @@ export function CertificatesClientPage() {
             setDraft(payload.data);
             setIssueDate(payload.data.defaults.issueDate);
             setStandard(payload.data.defaults.standard);
-            setScope(payload.data.defaults.scope);
-            setAuditRef(payload.data.defaults.auditRef);
+            setQualificationName(payload.data.defaults.scope);
+            setQualificationCode(payload.data.defaults.qualificationCode);
             setTranscriptRows(reorderRows(payload.data.transcriptRows));
             setIncludeTranscript(payload.data.latestCertificate?.includesTranscript || false);
         } catch (error) {
@@ -477,8 +477,8 @@ export function CertificatesClientPage() {
                     applicationId: draft.application.id,
                     issueDate,
                     standard,
-                    scope,
-                    auditRef,
+                    qualificationName,
+                    qualificationCode,
                     includeTranscript,
                     transcriptRows,
                 }),
@@ -520,7 +520,7 @@ export function CertificatesClientPage() {
         } finally {
             setGenerating(false);
         }
-    }, [auditRef, draft, includeTranscript, issueDate, scope, standard, transcriptRows]);
+    }, [draft, includeTranscript, issueDate, qualificationCode, qualificationName, standard, transcriptRows]);
 
     const handleClearQueue = useCallback(async () => {
         if (!canManageCertificates) {
@@ -1051,12 +1051,21 @@ export function CertificatesClientPage() {
                                     <Input id="certificate-standard" value={standard} onChange={(event) => setStandard(event.target.value)} />
                                 </div>
                                 <div className="space-y-2 md:col-span-2 xl:col-span-2">
-                                    <Label htmlFor="certificate-scope">Scope</Label>
-                                    <Textarea id="certificate-scope" value={scope} onChange={(event) => setScope(event.target.value)} rows={3} />
+                                    <Label htmlFor="certificate-qualification-name">Qualification Name</Label>
+                                    <Textarea
+                                        id="certificate-qualification-name"
+                                        value={qualificationName}
+                                        onChange={(event) => setQualificationName(event.target.value)}
+                                        rows={3}
+                                    />
                                 </div>
                                 <div className="space-y-2 md:col-span-2 xl:col-span-2">
-                                    <Label htmlFor="certificate-audit-ref">Audit Reference</Label>
-                                    <Input id="certificate-audit-ref" value={auditRef} onChange={(event) => setAuditRef(event.target.value)} />
+                                    <Label htmlFor="certificate-qualification-code">Qualification Code</Label>
+                                    <Input
+                                        id="certificate-qualification-code"
+                                        value={qualificationCode}
+                                        onChange={(event) => setQualificationCode(event.target.value)}
+                                    />
                                 </div>
                             </div>
 

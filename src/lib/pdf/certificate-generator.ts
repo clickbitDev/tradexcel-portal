@@ -1,4 +1,11 @@
-import { buildTemplate, type CertificateData, type TemplateFieldConfig, type UnitResult } from './template-builder';
+import {
+  buildTemplate,
+  resolveDefaultBaseTemplatePath,
+  resolveDefaultFieldConfig,
+  type CertificateData,
+  type TemplateFieldConfig,
+  type UnitResult,
+} from './template-builder';
 import { applyWatermark } from './watermark';
 import { applyRedaction } from './redaction';
 import { applyEncryption } from './security';
@@ -68,6 +75,9 @@ export async function generateCertificate(
     fieldConfig,
   } = options;
 
+  const resolvedBaseTemplatePath = baseTemplatePath ?? resolveDefaultBaseTemplatePath();
+  const resolvedFieldConfig = fieldConfig ?? resolveDefaultFieldConfig(resolvedBaseTemplatePath);
+
   if (!systemOwnerPassword) {
     throw new Error('OWNER_PASSWORD is required to generate secured certificates.');
   }
@@ -91,8 +101,8 @@ export async function generateCertificate(
     certificateNumber,
   };
   const { pdfBytes, fieldPositions } = await buildTemplate(templateData, {
-    baseTemplatePath,
-    fieldConfig,
+    baseTemplatePath: resolvedBaseTemplatePath,
+    fieldConfig: resolvedFieldConfig,
   });
   let currentPdf = pdfBytes;
 
@@ -119,9 +129,13 @@ export async function generateCertificate(
     logger.info('Applying watermark...');
     currentPdf = await applyWatermark(currentPdf);
 
-    // Step 4: Apply redaction
-    logger.info('Applying redaction...');
-    currentPdf = await applyRedaction(currentPdf, fieldPositions);
+    if (resolvedFieldConfig.disableRedaction !== true) {
+      // Step 4: Apply redaction
+      logger.info('Applying redaction...');
+      currentPdf = await applyRedaction(currentPdf, fieldPositions);
+    } else {
+      logger.info('Skipping redaction for this template variant');
+    }
 
     // Step 5: Apply encryption with restricted permissions
     currentPdf = await applyEncryption(currentPdf, {

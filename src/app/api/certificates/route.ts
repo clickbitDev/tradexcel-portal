@@ -31,8 +31,8 @@ const GenerateCertificateRequestSchema = z.object({
     applicationId: z.string().uuid(),
     issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     standard: z.string().trim().min(1).max(255),
-    scope: z.string().trim().min(1).max(500),
-    auditRef: z.string().trim().min(1).max(255),
+    qualificationName: z.string().trim().min(1).max(500),
+    qualificationCode: z.string().trim().min(1).max(50),
     includeTranscript: z.boolean().default(false),
     transcriptRows: z.array(CertificateTranscriptRowSchema).max(500).default([]),
 });
@@ -157,9 +157,10 @@ export async function POST(request: NextRequest) {
         const requestPayload: CertificateGenerationRequestPayload = buildCertificateGenerationPayload({
             draft,
             issueDate: parsed.data.issueDate,
-            scope: parsed.data.scope,
+            qualificationName: parsed.data.qualificationName,
+            qualificationCode: parsed.data.qualificationCode,
             standard: parsed.data.standard,
-            auditRef: parsed.data.auditRef,
+            auditRef: draft.defaults.auditRef,
             includeTranscript: parsed.data.includeTranscript,
             transcriptRows: includedTranscriptRows,
         });

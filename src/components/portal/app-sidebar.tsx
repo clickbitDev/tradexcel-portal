@@ -9,16 +9,20 @@ import {
     Settings,
     ShieldCheck,
 } from 'lucide-react';
-import Image from 'next/image';
 
 import { NavMainPortal, type NavItem } from '@/components/portal/nav-main-portal';
 import { NavUserPortal } from '@/components/portal/nav-user-portal';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { BrandImage } from '@/components/branding/BrandImage';
 import { usePermissions, ActionPermission } from '@/hooks/usePermissions';
 import { usePathname } from 'next/navigation';
 import {
     getPortalRouteBase,
 } from '@/lib/routes/portal';
+import {
+    BRAND_PORTAL_SIDEBAR_LOGO_DARK_SRC,
+    BRAND_PORTAL_SIDEBAR_LOGO_SRC,
+} from '@/lib/brand';
 import {
     Sidebar,
     SidebarContent,
@@ -131,19 +135,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white/10">
-                                <Image
-                                    src="/edward_portal_logo_symbol.png"
-                                    alt="Edward Business College"
+                                <BrandImage
+                                    src={BRAND_PORTAL_SIDEBAR_LOGO_SRC}
+                                    darkSrc={BRAND_PORTAL_SIDEBAR_LOGO_DARK_SRC}
                                     width={32}
                                     height={32}
-                                    className="size-8"
+                                    priority
+                                    imageClassName="size-8"
                                 />
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-bold text-base">
                                     {role ? (ROLE_LABELS[role] || role.replace(/_/g, ' ')) : 'Loading...'}
                                 </span>
-                                <span className="truncate text-xs">Edward Business College</span>
+                                <span className="truncate text-xs">Tradexcel Institute</span>
                             </div>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

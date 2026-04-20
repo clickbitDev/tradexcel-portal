@@ -103,20 +103,31 @@ export interface TemplateResult {
 // Template coordinate configuration
 // ─────────────────────────────────────────────────────────────────
 
+export interface TextFieldConfig {
+  x: number;
+  y: number;
+  size: number;
+  maxWidth?: number;
+}
+
 export interface TemplateFieldConfig {
+  variant?: 'default' | 'tradexcel-2026';
+  disableRedaction?: boolean;
   certPage: {
-    clientName: { x: number; y: number; size: number; maxWidth?: number };
-    certificateTitle: { x: number; y: number; size: number };
-    issueDate: { x: number; y: number; size: number };
-    certNumber: { x: number; y: number; size: number };
-    scope: { x: number; y: number; size: number };
-    standard: { x: number; y: number; size: number };
-    auditRef: { x: number; y: number; size: number };
+    clientName: TextFieldConfig;
+    certificateTitle: TextFieldConfig;
+    issueDate: TextFieldConfig;
+    certNumber: TextFieldConfig;
+    scope: TextFieldConfig;
+    standard: TextFieldConfig;
+    auditRef: TextFieldConfig;
   };
   transcriptPage?: {
-    title: { x: number; y: number; size: number };
-    clientName: { x: number; y: number; size: number };
-    certNumber: { x: number; y: number; size: number };
+    title: TextFieldConfig;
+    clientName: TextFieldConfig;
+    qualification?: TextFieldConfig;
+    certNumber: TextFieldConfig;
+    issueDate?: TextFieldConfig;
     tableStart: { x: number; y: number };
     tableColumns: {
       unitCodeX: number;
@@ -125,10 +136,15 @@ export interface TemplateFieldConfig {
     };
     rowHeight: number;
     fontSize: number;
+    bottomY?: number;
+    continuationNote?: TextFieldConfig;
   };
+  fixedRedaction?: Partial<FieldPositions>;
 }
 
 export const DEFAULT_FIELD_CONFIG: TemplateFieldConfig = {
+  variant: 'default',
+  disableRedaction: false,
   certPage: {
     certificateTitle: { x: PAGE_W / 2, y: 510, size: 18 },
     clientName:       { x: PAGE_W / 2, y: 580, size: 24, maxWidth: 450 },
@@ -153,6 +169,56 @@ export const DEFAULT_FIELD_CONFIG: TemplateFieldConfig = {
   },
 };
 
+export const TRADEXCEL_TEMPLATE_FILENAME = 'Tradexcel Certificate 2026v1.0_low(F)-1.pdf';
+
+const TRADEXCEL_TEMPLATE_ASSET_PATH = path.join(process.cwd(), TRADEXCEL_TEMPLATE_FILENAME);
+
+export const TRADEXCEL_FIELD_CONFIG: TemplateFieldConfig = {
+  variant: 'tradexcel-2026',
+  disableRedaction: true,
+  certPage: {
+    clientName:       { x: PAGE_W / 2, y: 450, size: 20, maxWidth: 455 },
+    certificateTitle: { x: PAGE_W / 2, y: 344, size: 17, maxWidth: 470 },
+    issueDate:        { x: 118, y: 252, size: 9.5, maxWidth: 120 },
+    certNumber:       { x: 486, y: 252, size: 9.5, maxWidth: 120 },
+    scope:            { x: 0, y: 0, size: 0 },
+    standard:         { x: 0, y: 0, size: 0 },
+    auditRef:         { x: 0, y: 0, size: 0 },
+  },
+  transcriptPage: {
+    title:         { x: PAGE_W / 2, y: 677, size: 22 },
+    clientName:    { x: 176, y: 648, size: 10, maxWidth: 330 },
+    qualification: { x: 176, y: 623, size: 8.5, maxWidth: 300 },
+    certNumber:    { x: 176, y: 598, size: 10, maxWidth: 150 },
+    issueDate:     { x: 404, y: 598, size: 10, maxWidth: 110 },
+    tableStart:    { x: 90, y: 552 },
+    tableColumns: {
+      unitCodeX: 90,
+      unitTitleX: 182,
+      resultX: 498,
+    },
+    rowHeight: 17,
+    fontSize: 8.5,
+    bottomY: 160,
+    continuationNote: { x: PAGE_W / 2, y: 653, size: 9 },
+  },
+};
+
+export function resolveDefaultBaseTemplatePath(): string | undefined {
+  const configuredPath = process.env.CERTIFICATE_TEMPLATE_PATH?.trim();
+  const candidates = [configuredPath, TRADEXCEL_TEMPLATE_ASSET_PATH].filter((value): value is string => !!value);
+
+  return candidates.find((candidate) => fs.existsSync(candidate));
+}
+
+export function resolveDefaultFieldConfig(baseTemplatePath?: string): TemplateFieldConfig {
+  if (baseTemplatePath && path.basename(baseTemplatePath) === TRADEXCEL_TEMPLATE_FILENAME) {
+    return TRADEXCEL_FIELD_CONFIG;
+  }
+
+  return DEFAULT_FIELD_CONFIG;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // Font loading helper
 // ─────────────────────────────────────────────────────────────────
@@ -169,6 +235,8 @@ interface EmbeddedFonts {
   montserratBold: PDFFont;
   helveticaBold: PDFFont;
   helvetica: PDFFont;
+  timesBold: PDFFont;
+  timesRoman: PDFFont;
   dancingScript: PDFFont;
 }
 
@@ -190,10 +258,23 @@ async function embedCustomFonts(pdfDoc: PDFDocument): Promise<EmbeddedFonts> {
   const montserratBold = await pdfDoc.embedFont(montserratBoldBytes);
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const timesBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const dancingScriptBytes = fs.readFileSync(assetPath('assets/fonts/DancingScript.ttf'));
   const dancingScript = await pdfDoc.embedFont(dancingScriptBytes);
 
-  return { raleway, ralewayBold, ralewayExtraBold, montserrat, montserratBold, helveticaBold, helvetica, dancingScript };
+  return { raleway, ralewayBold, ralewayExtraBold, montserrat, montserratBold, helveticaBold, helvetica, timesBold, timesRoman, dancingScript };
+}
+
+function flattenTemplateFormFields(pdfDoc: PDFDocument): void {
+  try {
+    const form = pdfDoc.getForm();
+    if (form.getFields().length > 0) {
+      form.flatten();
+    }
+  } catch (error) {
+    logger.warn('Failed to flatten template form fields', { error: String(error) });
+  }
 }
 
 function getFittedImageSize(
@@ -340,10 +421,15 @@ async function buildFromBaseTemplate(
   templatePath: string,
   config: TemplateFieldConfig
 ): Promise<TemplateResult> {
+  if (config.variant === 'tradexcel-2026') {
+    return buildTradexcelFromTemplate(data, templatePath, config);
+  }
+
   logger.info('Loading base PDF template', { path: templatePath });
 
   const templateBytes = fs.readFileSync(templatePath);
   const pdfDoc = await PDFDocument.load(templateBytes);
+  flattenTemplateFormFields(pdfDoc);
   const fonts = await embedCustomFonts(pdfDoc);
   const pages = pdfDoc.getPages();
 
@@ -377,6 +463,266 @@ async function buildFromBaseTemplate(
 
   const pdfBytes = await pdfDoc.save();
   return { pdfBytes, fieldPositions };
+}
+
+type FieldRect = FieldPositions[keyof FieldPositions];
+
+function zeroRect(): FieldRect {
+  return { x: 0, y: 0, w: 0, h: 0 };
+}
+
+function emptyFieldPositions(): FieldPositions {
+  return {
+    scope: zeroRect(),
+    auditRef: zeroRect(),
+    certNo: zeroRect(),
+    clientName: zeroRect(),
+    issueDate: zeroRect(),
+    ceoSignature: zeroRect(),
+    page2CertNo: zeroRect(),
+    page2Date: zeroRect(),
+  };
+}
+
+function rectFromTextBounds(
+  bounds: { x: number; y: number; w: number; h: number },
+  padX: number = 2,
+  padY: number = 3,
+): FieldRect {
+  return {
+    x: bounds.x - padX,
+    y: bounds.y - padY,
+    w: bounds.w + padX * 2,
+    h: bounds.h + padY * 2,
+  };
+}
+
+function buildQualificationLabel(data: CertificateData): string {
+  return data.qualificationCode
+    ? `${data.qualificationCode} - ${data.certificateTitle}`
+    : data.certificateTitle;
+}
+
+async function populateTradexcelCertificateFields(
+  templateDoc: PDFDocument,
+  data: CertificateData,
+): Promise<void> {
+  const form = templateDoc.getForm();
+  const font = await templateDoc.embedFont(StandardFonts.Helvetica);
+
+  form.getTextField('Name').setText(data.clientName.trim().toUpperCase());
+  form.getTextField('Qualification').setText(buildQualificationLabel(data).trim());
+  form.getTextField('Cerno').setText(data.certificateNumber);
+  form.getTextField('Issuedate_af_date').setText(formatDate(data.issueDate));
+  form.updateFieldAppearances(font);
+  form.flatten();
+}
+
+async function buildTradexcelFromTemplate(
+  data: CertificateData,
+  templatePath: string,
+  config: TemplateFieldConfig,
+): Promise<TemplateResult> {
+  if (!config.transcriptPage) {
+    throw new Error('Tradexcel template requires transcript page configuration');
+  }
+
+  logger.info('Loading Tradexcel certificate template', { path: templatePath });
+
+  const templateBytes = fs.readFileSync(templatePath);
+  const certificateTemplateDoc = await PDFDocument.load(templateBytes);
+  await populateTradexcelCertificateFields(certificateTemplateDoc, data);
+
+  const templateDoc = await PDFDocument.load(templateBytes);
+  flattenTemplateFormFields(templateDoc);
+  const pdfDoc = await PDFDocument.create();
+  const fonts = await embedCustomFonts(pdfDoc);
+  const fieldPositions = emptyFieldPositions();
+
+  const [certTemplatePage] = await pdfDoc.copyPages(certificateTemplateDoc, [0]);
+  pdfDoc.addPage(certTemplatePage);
+
+  if (data.units && data.units.length > 0) {
+    const transcriptPositions = await renderTradexcelTranscriptPages(
+      pdfDoc,
+      templateDoc,
+      data,
+      config.transcriptPage,
+      fonts,
+    );
+    fieldPositions.page2CertNo = transcriptPositions.certNo;
+    fieldPositions.page2Date = transcriptPositions.date;
+  }
+
+  const pdfBytes = await pdfDoc.save();
+  return { pdfBytes, fieldPositions };
+}
+
+async function renderTradexcelTranscriptPages(
+  pdfDoc: PDFDocument,
+  templateDoc: PDFDocument,
+  data: CertificateData,
+  config: NonNullable<TemplateFieldConfig['transcriptPage']>,
+  fonts: EmbeddedFonts,
+): Promise<{ certNo: FieldRect; date: FieldRect }> {
+  const units = data.units ?? [];
+  if (units.length === 0) {
+    return { certNo: zeroRect(), date: zeroRect() };
+  }
+
+  const qualificationLabel = buildQualificationLabel(data);
+  const bottomY = config.bottomY ?? 160;
+  let cursor = 0;
+  let pageIndex = 0;
+  let lastCertBounds = zeroRect();
+  let lastDateBounds = zeroRect();
+
+  while (cursor < units.length) {
+    const [templatePage] = await pdfDoc.copyPages(templateDoc, [1]);
+    const page = pdfDoc.addPage(templatePage);
+    const isContinuation = pageIndex > 0;
+
+    renderTradexcelTranscriptHeader(page, data, qualificationLabel, config, fonts, isContinuation);
+
+    let rowY = config.tableStart.y;
+    while (cursor < units.length && rowY - config.rowHeight >= bottomY) {
+      drawTradexcelTranscriptRow(page, units[cursor], cursor, rowY, config, fonts);
+      rowY -= config.rowHeight;
+      cursor += 1;
+    }
+
+    if (cursor >= units.length) {
+      const certBounds = drawFittedText(
+        page,
+        data.certificateNumber,
+        config.certNumber.x,
+        config.certNumber.y,
+        fonts.helveticaBold,
+        config.certNumber.size,
+        config.certNumber.maxWidth ?? 150,
+        CHARCOAL,
+      );
+      lastCertBounds = rectFromTextBounds(certBounds);
+
+      if (config.issueDate) {
+        const dateBounds = drawFittedText(
+          page,
+          formatDate(data.issueDate),
+          config.issueDate.x,
+          config.issueDate.y,
+          fonts.helveticaBold,
+          config.issueDate.size,
+          config.issueDate.maxWidth ?? 110,
+          CHARCOAL,
+        );
+        lastDateBounds = rectFromTextBounds(dateBounds);
+      }
+    }
+
+    pageIndex += 1;
+  }
+
+  return { certNo: lastCertBounds, date: lastDateBounds };
+}
+
+function renderTradexcelTranscriptHeader(
+  page: PDFPage,
+  data: CertificateData,
+  qualificationLabel: string,
+  config: NonNullable<TemplateFieldConfig['transcriptPage']>,
+  fonts: EmbeddedFonts,
+  isContinuation: boolean,
+): void {
+  drawFittedText(
+    page,
+    data.clientName.trim(),
+    config.clientName.x,
+    config.clientName.y,
+    fonts.helveticaBold,
+    config.clientName.size,
+    config.clientName.maxWidth ?? 330,
+    CHARCOAL,
+  );
+
+  if (config.qualification) {
+    drawFittedText(
+      page,
+      qualificationLabel,
+      config.qualification.x,
+      config.qualification.y,
+      fonts.helveticaBold,
+      config.qualification.size,
+      config.qualification.maxWidth ?? 330,
+      CHARCOAL,
+    );
+  }
+
+  if (isContinuation && config.continuationNote) {
+    drawCenteredFittedText(
+      page,
+      '(continued)',
+      config.continuationNote.x,
+      config.continuationNote.y,
+      fonts.helveticaBold,
+      config.continuationNote.size,
+      config.continuationNote.maxWidth ?? 120,
+      MID_GRAY,
+    );
+  }
+}
+
+function drawTradexcelTranscriptRow(
+  page: PDFPage,
+  unit: UnitResult,
+  rowIndex: number,
+  y: number,
+  config: NonNullable<TemplateFieldConfig['transcriptPage']>,
+  fonts: EmbeddedFonts,
+): void {
+  const rowY = y;
+  const tableLeft = config.tableColumns.unitCodeX - 6;
+  const tableWidth = PAGE_W - tableLeft - 48;
+
+  if (rowIndex % 2 === 0) {
+    page.drawRectangle({
+      x: tableLeft,
+      y: rowY - 3,
+      width: tableWidth,
+      height: config.rowHeight - 1,
+      color: LIGHT_GRAY,
+      opacity: 0.35,
+    });
+  }
+
+  page.drawText(unit.unitCode, {
+    x: config.tableColumns.unitCodeX,
+    y: rowY,
+    size: config.fontSize,
+    font: fonts.helveticaBold,
+    color: CHARCOAL,
+  });
+
+  let title = unit.unitTitle;
+  const maxTitleWidth = config.tableColumns.resultX - config.tableColumns.unitTitleX - 14;
+  while (fonts.helvetica.widthOfTextAtSize(title, config.fontSize) > maxTitleWidth && title.length > 10) {
+    title = `${title.slice(0, -4)}...`;
+  }
+
+  page.drawText(title, {
+    x: config.tableColumns.unitTitleX,
+    y: rowY,
+    size: config.fontSize,
+    font: fonts.helvetica,
+    color: CHARCOAL,
+  });
+
+  page.drawText(abbreviateResult(unit.result), {
+    x: config.tableColumns.resultX,
+    y: rowY,
+    size: config.fontSize,
+    font: fonts.helveticaBold,
+    color: CHARCOAL,
+  });
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1494,6 +1840,36 @@ function drawCenteredText(
     font,
     color,
   });
+}
+
+function drawFittedText(
+  page: PDFPage,
+  text: string,
+  x: number,
+  y: number,
+  font: PDFFont,
+  maxSize: number,
+  maxWidth: number,
+  color: ReturnType<typeof rgb>,
+): { x: number; y: number; w: number; h: number; size: number } {
+  const size = clampFontSize(font, text, maxSize, maxWidth);
+  const width = font.widthOfTextAtSize(text, size);
+
+  page.drawText(text, {
+    x,
+    y,
+    size,
+    font,
+    color,
+  });
+
+  return {
+    x,
+    y,
+    w: width,
+    h: size,
+    size,
+  };
 }
 
 function drawCenteredFittedText(

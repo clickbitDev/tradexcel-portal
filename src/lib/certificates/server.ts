@@ -89,6 +89,8 @@ type CertificateUnitResultRow = {
     sort_order: number;
 };
 
+const CERTIFICATE_RECORD_SELECT = 'id, application_id, certificate_number, certificate_title, issue_date, status, version, includes_transcript, verification_url, generated_at, request_payload, document_id, document:documents!certificate_records_document_id_fkey(id, file_name)';
+
 type CertificateGenerationJobRow = {
     id: string;
     application_id: string;
@@ -343,7 +345,7 @@ async function fetchLatestCertificateRecords(
 
     const { data, error } = await supabase
         .from('certificate_records')
-        .select('id, application_id, certificate_number, certificate_title, issue_date, status, version, includes_transcript, verification_url, generated_at, request_payload, document_id, document:documents(id, file_name)')
+        .select(CERTIFICATE_RECORD_SELECT)
         .in('application_id', applicationIds)
         .order('generated_at', { ascending: false })
         .returns<CertificateRecordRow[]>();
@@ -372,7 +374,7 @@ async function fetchCertificateRecordsById(
 
     const { data, error } = await supabase
         .from('certificate_records')
-        .select('id, application_id, certificate_number, certificate_title, issue_date, status, version, includes_transcript, verification_url, generated_at, request_payload, document_id, document:documents(id, file_name)')
+        .select(CERTIFICATE_RECORD_SELECT)
         .in('id', certificateIds)
         .returns<CertificateRecordRow[]>();
 
@@ -595,7 +597,8 @@ export async function createQueuedCertificateGenerationJob(
 export function buildCertificateGenerationPayload(input: {
     draft: CertificateDraftPayload;
     issueDate: string;
-    scope: string;
+    qualificationName: string;
+    qualificationCode: string;
     standard: string;
     auditRef: string;
     includeTranscript: boolean;
@@ -609,13 +612,13 @@ export function buildCertificateGenerationPayload(input: {
             studentName: input.draft.application.studentName,
             studentEmail: input.draft.application.studentEmail,
             qualificationId: input.draft.application.qualificationId,
-            qualificationCode: input.draft.application.qualificationCode,
-            qualificationName: input.draft.application.qualificationName,
+            qualificationCode: input.qualificationCode,
+            qualificationName: input.qualificationName,
         },
         issueDate: input.issueDate,
-        certificateTitle: input.draft.application.qualificationName || 'Certificate',
+        certificateTitle: input.qualificationName || 'Certificate',
         keyDetails: {
-            scope: input.scope,
+            scope: input.qualificationName,
             standard: input.standard,
             auditRef: input.auditRef,
         },
@@ -769,7 +772,8 @@ export async function fetchCertificateDraftPayload(
         defaults: {
             issueDate,
             standard: readNestedString(payload, ['keyDetails', 'standard']) || DEFAULT_CERTIFICATE_STANDARD,
-            scope: readNestedString(payload, ['keyDetails', 'scope']) || qualification.name,
+            scope: readNestedString(payload, ['keyDetails', 'scope']) || readNestedString(payload, ['certificateTitle']) || qualification.name,
+            qualificationCode: readNestedString(payload, ['application', 'qualificationCode']) || qualification.code,
             auditRef: readNestedString(payload, ['keyDetails', 'auditRef']) || application.application_number || application.student_uid,
         },
         latestCertificate: latestCertificateSummary,

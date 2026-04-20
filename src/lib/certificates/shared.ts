@@ -110,6 +110,7 @@ export interface CertificateDraftPayload {
         issueDate: string;
         standard: string;
         scope: string;
+        qualificationCode: string;
         auditRef: string;
     };
     latestCertificate: CertificateSummary | null;

@@ -10,10 +10,29 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppUserGuideOverlay } from '@/components/guides/AppUserGuideOverlay';
 import { RuntimePublicEnvScript } from '@/components/runtime-public-env-script';
 import { BRAND_METADATA_DESCRIPTION, BRAND_METADATA_TITLE, BRAND_THEME_STORAGE_KEY } from '@/lib/brand';
-import { Geist } from "next/font/google";
+import { Lato, Merriweather, Roboto_Mono } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const lato = Lato({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: BRAND_METADATA_TITLE,
@@ -26,7 +45,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
     return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn("font-sans", lato.variable, merriweather.variable, robotoMono.variable)}
+    >
       <body className="font-sans antialiased">
         <RuntimePublicEnvScript />
         <ErrorBoundary>
