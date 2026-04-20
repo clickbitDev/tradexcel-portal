@@ -1,0 +1,13 @@
+export const BRAND_NAME = 'Sharp Future';
+export const BRAND_PORTAL_NAME = 'Sharp Future';
+export const BRAND_LOGO_SRC = '/edward_logo_primary.png';
+export const BRAND_LOGO_DARK_SRC = '/edward_logo_primary.png';
+export const BRAND_PORTAL_SIDEBAR_LOGO_SRC = '/edward_portal_logo_symbol.png';
+export const BRAND_PORTAL_SIDEBAR_LOGO_DARK_SRC = '/edward_portal_logo_symbol.png';
+export const BRAND_LOGO_ALT = 'Sharp Future';
+export const BRAND_METADATA_TITLE = 'Edward Business Collage';
+export const BRAND_METADATA_DESCRIPTION = 'Comprehensive management platform for RTOs, qualifications, agents, and student applications';
+export const BRAND_ADMISSIONS_TEAM = 'Sharp Future Admissions Team';
+export const BRAND_COMPLIANCE_REPORT_TITLE = 'Sharp Future Compliance Report';
+export const BRAND_NOTIFICATION_SUBJECT = 'Notification from Sharp Future';
+export const BRAND_THEME_STORAGE_KEY = 'sharp-future-theme';

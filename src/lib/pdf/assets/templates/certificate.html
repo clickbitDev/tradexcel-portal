@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate of Completion - Edward Business College</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Raleway:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 297mm;
+    font-family: 'Montserrat', sans-serif;
+    background: #f5f5f5;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     PAGE 1: CERTIFICATE
+     ═══════════════════════════════════════════════════════ */
+  .cert {
+    width: 297mm;
+    height: 210mm;
+    position: relative;
+    background: #FDFCFA;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  /* ── Complex background pattern ─────────────────────── */
+  .cert::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      /* Subtle radial highlights */
+      radial-gradient(ellipse at 15% 30%, rgba(194,154,58,0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 85% 70%, rgba(115,30,45,0.04) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.6) 0%, transparent 70%),
+      /* Geometric diamond lattice */
+      linear-gradient(45deg, rgba(194,154,58,0.03) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(194,154,58,0.03) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(194,154,58,0.03) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(194,154,58,0.03) 75%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px, 40px 40px, 40px 40px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 20px, 20px -20px, 20px 0;
+    z-index: 0;
+  }
+
+  /* ── Ornate border ──────────────────────────────────── */
+  .border-outer {
+    position: absolute;
+    inset: 7mm;
+    border: 2.5px solid #C29A3A;
+    z-index: 1;
+  }
+  .border-inner {
+    position: absolute;
+    inset: 10mm;
+    border: 1px solid rgba(194,154,58,0.35);
+    z-index: 1;
+  }
+  /* Corner accents */
+  .border-inner::before, .border-inner::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border: 2px solid #C29A3A;
+  }
+  .border-inner::before {
+    top: -3px; left: -3px;
+    border-right: none; border-bottom: none;
+  }
+  .border-inner::after {
+    top: -3px; right: -3px;
+    border-left: none; border-bottom: none;
+  }
+  .corner-bl, .corner-br {
+    position: absolute;
+    width: 20px; height: 20px;
+    border: 2px solid #C29A3A;
+    z-index: 2;
+  }
+  .corner-bl {
+    bottom: calc(10mm - 3px); left: calc(10mm - 3px);
+    border-right: none; border-top: none;
+  }
+  .corner-br {
+    bottom: calc(10mm - 3px); right: calc(10mm - 3px);
+    border-left: none; border-top: none;
+  }
+
+  /* ── Maroon header strip ────────────────────────────── */
+  .header {
+    position: absolute;
+    top: 10mm; left: 10mm; right: 10mm;
+    height: 46mm;
+    background: linear-gradient(160deg, #5a1520 0%, #731E2D 50%, #8B2A3A 100%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  /* Subtle cross-hatch overlay on header */
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px),
+      repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.015) 20px, rgba(255,255,255,0.015) 21px);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #A07828, #D4AF5A 30%, #EBC878 50%, #D4AF5A 70%, #A07828);
+  }
+
+  /* ── EBC Logo ───────────────────────────────────────── */
+  .logo-container {
+    width: 60mm;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 6mm;
+    z-index: 3;
+  }
+  .logo-container img {
+    height: 38mm;
+    width: auto;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  }
+
+  /* ── Header center text ─────────────────────────────── */
+  .header-center {
+    flex: 1;
+    text-align: center;
+    z-index: 3;
+  }
+  .title-main {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: #D4AF5A;
+    letter-spacing: 6px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .title-sub {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(212,175,90,0.75);
+    letter-spacing: 6px;
+    margin-top: 2px;
+  }
+
+  /* ── Header right: RTO info ─────────────────────────── */
+  .header-right {
+    width: 55mm;
+    text-align: right;
+    padding-right: 6mm;
+    z-index: 3;
+  }
+  .rto-name {
+    font-family: 'Raleway', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
+    letter-spacing: 1px;
+  }
+  .rto-details {
+    font-size: 6px;
+    color: rgba(212,175,90,0.65);
+    margin-top: 3px;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Main content ───────────────────────────────────── */
+  .content {
+    position: absolute;
+    top: 59mm; left: 16mm; right: 16mm;
+    bottom: 38mm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 3;
+  }
+
+  .divider {
+    width: 70px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #C29A3A, transparent);
+    margin: 5mm 0;
+  }
+
+  .issued-to {
+    font-size: 10px;
+    font-weight: 400;
+    color: #888;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 3mm;
+  }
+
+  .student-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: #1A1E33;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .name-line {
+    width: 300px;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, #C29A3A 20%, #C29A3A 80%, transparent);
+    margin: 3mm 0;
+  }
+
+  .achieved-text {
+    font-size: 9px;
+    font-weight: 400;
+    color: #999;
+    letter-spacing: 1px;
+    margin-bottom: 3mm;
+  }
+
+  .qualification {
+    font-family: 'Raleway', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #731E2D;
+    text-align: center;
+    letter-spacing: 0.5px;
+    margin-bottom: 4mm;
+    line-height: 1.4;
+  }
+
+  .aqf-recognised {
+    font-size: 7.5px;
+    font-weight: 500;
+    color: #B08A30;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4mm;
+    padding: 3px 12px;
+    border: 1px solid rgba(194,154,58,0.3);
+    background: rgba(194,154,58,0.04);
+  }
+
+  /* ── Details grid ───────────────────────────────────── */
+  .details {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 0;
+    width: 340px;
+  }
+  .d-label, .d-value {
+    padding: 3.5px 0;
+    border-bottom: 1px solid rgba(194,154,58,0.12);
+  }
+  .d-label {
+    font-family: 'Raleway', sans-serif;
+    font-size: 7.5px;
+    font-weight: 600;
+    color: #B08A30;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .d-value {
+    font-size: 8px;
+    font-weight: 500;
+    color: #1A1E33;
+  }
+
+  /* ── Bottom section ─────────────────────────────────── */
+  .bottom-row {
+    position: absolute;
+    bottom: 14mm; left: 14mm; right: 14mm;
+    height: 22mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 3;
+  }
+
+  /* Signature */
+  .sig-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100px;
+  }
+  .sig-line {
+    width: 90px;
+    height: 1px;
+    background: #731E2D;
+    margin-bottom: 3px;
+  }
+  .sig-text {
+    font-size: 6px;
+    color: #999;
+    letter-spacing: 0.5px;
+  }
+
+  /* QR section */
+  .qr-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .qr-img {
+    width: 38px; height: 38px;
+    background: #eee;
+    border: 1px solid #ddd;
+  }
+  .qr-text {
+    font-size: 4.5px;
+    color: #731E2D;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .print-code {
+    font-size: 4px;
+    color: #ccc;
+    margin-top: 1px;
+  }
+
+  /* Government logos — white container to blend */
+  .gov-logos-block {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: #FFFFFF;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .gov-logos-block img {
+    height: 24px;
+    width: auto;
+  }
+
+  /* ── Footer strip ───────────────────────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 10mm; left: 10mm; right: 10mm;
+    height: 4mm;
+    background: linear-gradient(160deg, #5a1520, #731E2D);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: -1.5px; left: 0; right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, #A07828, #D4AF5A 30%, #EBC878 50%, #D4AF5A 70%, #A07828);
+  }
+  .footer-text {
+    font-size: 5px;
+    color: rgba(212,175,90,0.75);
+    letter-spacing: 2px;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     PAGE 2: TRANSCRIPT
+     ═══════════════════════════════════════════════════════ */
+  .transcript {
+    width: 297mm;
+    height: 210mm;
+    position: relative;
+    background: #FDFCFA;
+    overflow: hidden;
+  }
+  .transcript .border-outer, .transcript .border-inner { position: absolute; }
+  .transcript::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(194,154,58,0.04) 0%, transparent 50%);
+    z-index: 0;
+  }
+
+  .t-header {
+    position: absolute;
+    top: 10mm; left: 10mm; right: 10mm;
+    height: 26mm;
+    background: linear-gradient(160deg, #5a1520 0%, #731E2D 50%, #8B2A3A 100%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .t-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #A07828, #D4AF5A 30%, #EBC878 50%, #D4AF5A 70%, #A07828);
+  }
+  .t-header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #D4AF5A;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+
+  .t-info {
+    position: absolute;
+    top: 39mm; left: 15mm; right: 15mm;
+    text-align: center;
+    z-index: 3;
+  }
+  .t-student {
+    font-family: 'Raleway', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1A1E33;
+    letter-spacing: 1px;
+  }
+  .t-qual {
+    font-size: 8px;
+    color: #731E2D;
+    font-weight: 500;
+    margin-top: 3px;
+  }
+  .t-cert {
+    font-size: 7px;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  .units-wrap {
+    position: absolute;
+    top: 52mm; left: 16mm; right: 16mm; bottom: 16mm;
+    z-index: 3;
+    overflow: hidden;
+  }
+  .units-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8px;
+  }
+  .units-wrap thead th {
+    background: #731E2D;
+    color: #D4AF5A;
+    font-family: 'Raleway', sans-serif;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    text-align: left;
+  }
+  .units-wrap thead th:last-child { text-align: center; width: 80px; }
+  .units-wrap thead th:first-child { width: 100px; }
+  .units-wrap tbody tr:nth-child(even) { background: rgba(194,154,58,0.035); }
+  .units-wrap tbody td {
+    padding: 4.5px 10px;
+    border-bottom: 1px solid rgba(194,154,58,0.1);
+    color: #333;
+    font-size: 8px;
+  }
+  .units-wrap tbody td:first-child {
+    font-weight: 600;
+    color: #1A1E33;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.3px;
+  }
+  .units-wrap tbody td:last-child {
+    text-align: center;
+    font-weight: 600;
+    color: #2D8548;
+  }
+  .units-wrap tbody td.nyc { color: #C0392B; }
+
+  .t-footer {
+    position: absolute;
+    bottom: 10mm; left: 10mm; right: 10mm;
+    height: 4mm;
+    background: linear-gradient(160deg, #5a1520, #731E2D);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .t-footer::before {
+    content: '';
+    position: absolute;
+    top: -1.5px; left: 0; right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, #A07828, #D4AF5A 30%, #EBC878 50%, #D4AF5A 70%, #A07828);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGE 1: CERTIFICATE
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="cert">
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+  <div class="corner-bl"></div>
+  <div class="corner-br"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="../logos/ebc-logo.png" alt="EBC">
+    </div>
+    <div class="header-center">
+      <div class="title-main">Certificate</div>
+      <div class="title-sub">of Completion</div>
+    </div>
+    <div class="header-right">
+      <div class="rto-name">EDWARD BUSINESS COLLEGE</div>
+      <div class="rto-details">
+        RTO Code: 45818<br>
+        ABN: 86 643 641 990<br>
+        National Provider #45818
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="divider"></div>
+
+    <div class="issued-to">This certificate is issued to</div>
+
+    <div class="student-name">John Alexander Smith</div>
+    <div class="name-line"></div>
+
+    <div class="achieved-text">for successfully achieving</div>
+
+    <div class="qualification">BSB50420 — Diploma of Leadership and Management</div>
+
+    <div class="aqf-recognised">Australian Qualifications Framework Recognised</div>
+
+    <div class="details">
+      <div class="d-label">Certificate No</div>
+      <div class="d-value">CERT-EBC-2026-001</div>
+      <div class="d-label">Date of Issue</div>
+      <div class="d-value">14 March 2026</div>
+      <div class="d-label">Date of Expiry</div>
+      <div class="d-value">14 March 2029</div>
+    </div>
+  </div>
+
+  <!-- Bottom row -->
+  <div class="bottom-row">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-text">Authorised Signatory</div>
+    </div>
+
+    <div class="qr-block">
+      <div class="qr-img" id="qr"></div>
+      <div class="qr-text">Scan to Verify</div>
+      <div class="print-code">Print Code: PRT-7X9K-M2N4</div>
+    </div>
+
+    <div class="gov-logos-block">
+      <img src="../logos/aqf-001.png" alt="Australian Qualifications Framework">
+      <img src="../logos/nrt-000.png" alt="Nationally Recognised Training">
+    </div>
+  </div>
+
+  <!-- Footer strip -->
+  <div class="footer">
+    <div class="footer-text">CERT-EBC-2026-001 &nbsp;&bull;&nbsp; Edward Business College Pty Ltd &nbsp;&bull;&nbsp; RTO 45818</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PAGE 2: TRANSCRIPT
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="transcript">
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+
+  <div class="t-header">
+    <div class="t-header-title">Transcript of Results</div>
+  </div>
+
+  <div class="t-info">
+    <div class="t-student">John Alexander Smith</div>
+    <div class="t-qual">BSB50420 — Diploma of Leadership and Management</div>
+    <div class="t-cert">Certificate: CERT-EBC-2026-001 &nbsp;|&nbsp; Issued: 14 March 2026</div>
+  </div>
+
+  <div class="units-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Unit Code</th>
+          <th>Unit Title</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>BSBCMM511</td><td>Communicate with influence</td><td>Competent</td></tr>
+        <tr><td>BSBCRT511</td><td>Develop critical thinking in others</td><td>Competent</td></tr>
+        <tr><td>BSBLDR523</td><td>Lead and manage effective workplace relationships</td><td>Competent</td></tr>
+        <tr><td>BSBOPS502</td><td>Manage business operational plans</td><td>Competent</td></tr>
+        <tr><td>BSBPEF502</td><td>Develop and use emotional intelligence</td><td>Competent</td></tr>
+        <tr><td>BSBTWK502</td><td>Manage team effectiveness</td><td>Competent</td></tr>
+        <tr><td>BSBCMM412</td><td>Lead difficult conversations</td><td>Competent</td></tr>
+        <tr><td>BSBLDR522</td><td>Manage people performance</td><td>Competent</td></tr>
+        <tr><td>BSBOPS504</td><td>Manage business risk</td><td>Competent</td></tr>
+        <tr><td>BSBOPS505</td><td>Manage organisational customer service</td><td>Competent</td></tr>
+        <tr><td>BSBTWK503</td><td>Manage meetings</td><td>Competent</td></tr>
+        <tr><td>BSBXCM501</td><td>Lead communication in the workplace</td><td>Competent</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="t-footer">
+    <div class="footer-text">CERT-EBC-2026-001 &nbsp;&bull;&nbsp; Edward Business College Pty Ltd &nbsp;&bull;&nbsp; RTO 45818</div>
+  </div>
+</div>
+
+</body>
+</html>

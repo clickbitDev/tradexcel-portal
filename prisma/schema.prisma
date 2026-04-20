@@ -1,0 +1,1560 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  admin
+  manager
+  staff
+  agent
+  ceo
+  executive_manager
+  accounts_manager
+  assessor
+  dispatch_coordinator
+  frontdesk
+  developer
+
+  @@map("user_role")
+}
+
+enum QualificationStatus {
+  current
+  superseded
+  deleted
+
+  @@map("qualification_status")
+}
+
+enum TgaSyncStatus {
+  synced
+  pending
+  error
+  never
+
+  @@map("tga_sync_status")
+}
+
+enum RtoStatus {
+  active
+  pending
+  suspended
+  inactive
+
+  @@map("rto_status")
+}
+
+enum PartnerType {
+  agent
+  provider
+  subagent
+
+  @@map("partner_type")
+}
+
+enum PartnerStatus {
+  active
+  pending
+  suspended
+  inactive
+
+  @@map("partner_status")
+}
+
+enum PriorityLevel {
+  standard
+  preferred
+  premium
+
+  @@map("priority_level")
+}
+
+enum WorkflowStage {
+  TRANSFERRED
+  docs_review
+  rto_processing
+  offer_issued
+  payment_pending
+  coe_issued
+  visa_applied
+  enrolled
+  evaluate
+  accounts
+  dispatch
+  completed
+  withdrawn
+  rejected
+
+  @@map("workflow_stage")
+}
+
+enum PaymentStatus {
+  unpaid
+  partial
+  paid
+  refunded
+
+  @@map("payment_status")
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  waiting
+  resolved
+  closed
+
+  @@map("ticket_status")
+}
+
+enum TicketPriority {
+  low
+  normal
+  high
+  urgent
+
+  @@map("ticket_priority")
+}
+
+enum NotificationChannel {
+  email
+  whatsapp
+  sms
+
+  @@map("notification_channel")
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  failed
+  cancelled
+
+  @@map("notification_status")
+}
+
+enum ReminderStatus {
+  active
+  paused
+  completed
+  expired
+
+  @@map("reminder_status")
+}
+
+enum QuerySourceType {
+  web_form
+  api
+  manual
+  import
+  referral
+  walk_in
+
+  @@map("query_source_type")
+}
+
+enum ContactChannel {
+  email
+  phone
+  whatsapp
+  meeting
+  other
+
+  @@map("contact_channel")
+}
+
+enum SyncResult {
+  success
+  partial
+  failed
+  skipped
+
+  @@map("sync_result")
+}
+
+enum NotificationType {
+  application_update
+  document_uploaded
+  document_verified
+  comment_added
+  mention
+  payment_received
+  reminder
+  approval_required
+  partner_update
+  system_alert
+  welcome
+  deadline_warning
+  assignment
+
+  @@map("notification_type")
+}
+
+enum BillStatus {
+  pending
+  received
+  paid
+  overdue
+  cancelled
+
+  @@map("bill_status")
+}
+
+enum BulkOperationType {
+  invoice
+  bill
+
+  @@map("bulk_operation_type")
+}
+
+enum BulkOperationStatus {
+  pending
+  processing
+  completed
+  failed
+
+  @@map("bulk_operation_status")
+}
+
+enum DocumentTypeEnum {
+  passport
+  visa
+  drivers_license
+  qualification
+  resume
+  academic_transcript
+  english_test
+  coe
+  offer_letter
+  invoice
+  bill
+  other
+
+  @@map("document_type_enum")
+}
+
+enum AccountStatus {
+  active
+  disabled
+
+  @@map("account_status")
+}
+
+enum AssessmentResult {
+  pending
+  pass
+  failed
+
+  @@map("assessment_result")
+}
+
+enum ApplicationOutcome {
+  active
+  withdrawn
+  rejected
+
+  @@map("application_outcome")
+}
+
+model Profile {
+  id               String        @id @db.Uuid
+  full_name        String        @db.Text
+  email            String        @db.Text
+  role             UserRole      @default(agent)
+  avatar_url       String?       @db.Text
+  phone            String?       @db.Text
+  created_at       DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?     @default(now()) @db.Timestamptz(6)
+  is_deleted       Boolean?      @default(false)
+  deleted_at       DateTime?     @db.Timestamptz(6)
+  deleted_by       String?       @db.Uuid
+  company_name     String?       @db.Text
+  secondary_emails String[]      @default([])
+  social_links     Json?         @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  assessor_rate    Decimal?      @db.Decimal(10, 2)
+  account_status   AccountStatus @default(active)
+
+  @@index([role], map: "idx_profiles_role")
+  @@index([deleted_by], map: "idx_profiles_deleted_by")
+  @@index([account_status], map: "idx_profiles_account_status")
+  @@map("profiles")
+}
+
+model Qualification {
+  id                           String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code                         String               @unique @db.Text
+  name                         String               @db.Text
+  level                        String?              @db.Text
+  status                       QualificationStatus? @default(current)
+  release_date                 DateTime?            @db.Date
+  superseded_by                String?              @db.Text
+  tga_sync_status              TgaSyncStatus?       @default(never)
+  tga_last_synced_at           DateTime?            @db.Timestamptz(6)
+  created_at                   DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime?            @default(now()) @db.Timestamptz(6)
+  is_archived                  Boolean?             @default(false)
+  archived_at                  DateTime?            @db.Timestamptz(6)
+  archived_by                  String?              @db.Uuid
+  is_deleted                   Boolean?             @default(false)
+  deleted_at                   DateTime?            @db.Timestamptz(6)
+  deleted_by                   String?              @db.Uuid
+  core_units                   Int?
+  elective_units               Int?
+  total_units                  Int?
+  entry_requirements           String?              @db.Text
+  cricos_code                  String?              @db.VarChar(20)
+  delivery_mode                String[]             @default([])
+  last_edited_by               String?              @db.Uuid
+  prerequisites                String[]             @default([])
+  certificate_preview_path     String?              @db.Text
+  certificate_preview_provider String?              @db.Text
+  certificate_preview_bucket   String?              @db.Text
+  certificate_preview_key      String?              @db.Text
+
+  @@index([code], map: "idx_qualifications_code")
+  @@index([archived_by], map: "idx_qualifications_archived_by")
+  @@index([deleted_by], map: "idx_qualifications_deleted_by")
+  @@index([last_edited_by], map: "idx_qualifications_last_edited_by")
+  @@map("qualifications")
+}
+
+model Rto {
+  id                   String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  code                 String         @unique @db.Text
+  name                 String         @db.Text
+  logo_url             String?        @db.Text
+  status               RtoStatus?     @default(active)
+  location             String?        @db.Text
+  state                String?        @db.Text
+  phone                String?        @db.Text
+  email                String?        @db.Text
+  website              String?        @db.Text
+  notes                String?        @db.Text
+  created_at           DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?      @default(now()) @db.Timestamptz(6)
+  cricos_provider_code String?        @db.VarChar(20)
+  delivery_modes       String[]       @default([])
+  certificate_types    String[]       @default([])
+  tga_sync_status      TgaSyncStatus? @default(never)
+  tga_last_synced_at   DateTime?      @db.Timestamptz(6)
+  tga_sync_error       String?        @db.Text
+  is_archived          Boolean?       @default(false)
+  archived_at          DateTime?      @db.Timestamptz(6)
+  archived_by          String?        @db.Uuid
+  is_deleted           Boolean?       @default(false)
+  deleted_at           DateTime?      @db.Timestamptz(6)
+  deleted_by           String?        @db.Uuid
+  contact_person_name  String?        @db.Text
+  assigned_manager_id  String?        @db.Uuid
+  provider_name        String?        @db.Text
+  xero_contact_id      String?        @db.VarChar(100)
+  xero_contact_url     String?        @db.VarChar(500)
+
+  @@index([code], map: "idx_rtos_code")
+  @@index([tga_sync_status], map: "idx_rtos_tga_sync_status")
+  @@index([archived_by], map: "idx_rtos_archived_by")
+  @@index([deleted_by], map: "idx_rtos_deleted_by")
+  @@index([assigned_manager_id], map: "idx_rtos_assigned_manager")
+  @@map("rtos")
+}
+
+model RtoOffering {
+  id                   String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  rto_id               String    @db.Uuid
+  qualification_id     String    @db.Uuid
+  tuition_fee_onshore  Decimal?  @db.Decimal(10, 2)
+  tuition_fee_offshore Decimal?  @db.Decimal(10, 2)
+  material_fee         Decimal?  @default(0) @db.Decimal(10, 2)
+  application_fee      Decimal?  @default(0) @db.Decimal(10, 2)
+  duration_weeks       Int?
+  intakes              String[]  @default([])
+  is_active            Boolean?  @default(true)
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
+  effective_date       DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  expiry_date          DateTime? @db.Date
+  version              Int?      @default(1)
+  approval_status      String?   @default("published") @db.VarChar(20)
+  is_archived          Boolean?  @default(false)
+  archived_at          DateTime? @db.Timestamptz(6)
+  archived_by          String?   @db.Uuid
+  is_deleted           Boolean?  @default(false)
+  deleted_at           DateTime? @db.Timestamptz(6)
+  deleted_by           String?   @db.Uuid
+  agent_fee            Decimal?  @default(0) @db.Decimal(10, 2)
+  lumiere_fee          Decimal?  @default(0) @db.Decimal(10, 2)
+  student_fee          Decimal?  @default(0) @db.Decimal(10, 2)
+  enrollment_fee       Decimal?  @default(0) @db.Decimal(10, 2)
+  misc_fee             Decimal?  @default(0) @db.Decimal(10, 2)
+  assessor_fee         Decimal?  @default(0) @db.Decimal(10, 2)
+  provider_fee         Decimal?  @default(0) @db.Decimal(10, 2)
+
+  @@unique([rto_id, qualification_id], map: "rto_offerings_rto_id_qualification_id_key")
+  @@index([rto_id], map: "idx_rto_offerings_rto")
+  @@index([qualification_id], map: "idx_rto_offerings_qual")
+  @@index([archived_by], map: "idx_rto_offerings_archived_by")
+  @@index([deleted_by], map: "idx_rto_offerings_deleted_by")
+  @@map("rto_offerings")
+}
+
+model Partner {
+  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  type                PartnerType
+  company_name        String          @db.Text
+  contact_name        String?         @db.Text
+  email               String?         @unique @db.Text
+  phone               String?         @db.Text
+  address             String?         @db.Text
+  country             String?         @db.Text
+  commission_rate     Decimal?        @db.Decimal(5, 2)
+  priority_level      PriorityLevel?  @default(standard)
+  user_id             String?         @db.Uuid
+  status              PartnerStatus?  @default(active)
+  notes               String?         @db.Text
+  created_at          DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?       @default(now()) @db.Timestamptz(6)
+  delivery_method     String?         @db.VarChar(50)
+  kpi_ontime_rate     Decimal?        @db.Decimal(5, 2)
+  kpi_conversion_rate Decimal?        @db.Decimal(5, 2)
+  assigned_manager_id String?         @db.Uuid
+  is_archived         Boolean?        @default(false)
+  archived_at         DateTime?       @db.Timestamptz(6)
+  archived_by         String?         @db.Uuid
+  is_deleted          Boolean?        @default(false)
+  deleted_at          DateTime?       @db.Timestamptz(6)
+  deleted_by          String?         @db.Uuid
+  preferred_channel   ContactChannel?
+  linked_rto_id       String?         @db.Uuid
+  parent_partner_id   String?         @db.Uuid
+  xero_contact_id     String?         @db.VarChar(100)
+  xero_contact_url    String?         @db.VarChar(500)
+
+  @@index([assigned_manager_id], map: "idx_partners_assigned_manager")
+  @@index([linked_rto_id], map: "idx_partners_linked_rto")
+  @@index([parent_partner_id], map: "idx_partners_parent_partner")
+  @@index([user_id], map: "idx_partners_user")
+  @@index([archived_by], map: "idx_partners_archived_by")
+  @@index([deleted_by], map: "idx_partners_deleted_by")
+  @@map("partners")
+}
+
+model StudentMaster {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  first_name       String    @db.VarChar(100)
+  last_name        String    @db.VarChar(100)
+  email            String?   @db.VarChar(255)
+  phone            String?   @db.VarChar(50)
+  passport_number  String?   @db.VarChar(50)
+  nationality      String?   @db.VarChar(100)
+  dob              DateTime? @db.Date
+  address          String?   @db.Text
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  is_deleted       Boolean?  @default(false)
+  deleted_at       DateTime? @db.Timestamptz(6)
+  deleted_by       String?   @db.Uuid
+  usi              String?   @db.VarChar(20)
+  visa_number      String?   @db.VarChar(50)
+  visa_expiry      DateTime? @db.Date
+  gender           String?   @db.VarChar(20)
+  country_of_birth String?   @db.VarChar(100)
+  street_no        String?   @db.Text
+  suburb           String?   @db.VarChar(100)
+  state            String?   @db.VarChar(50)
+  postcode         String?   @db.VarChar(20)
+
+  @@index([deleted_by], map: "idx_student_master_deleted_by")
+  @@index([email], map: "idx_student_master_email")
+  @@index([passport_number], map: "idx_student_master_passport")
+  @@index([last_name, first_name], map: "idx_student_master_name")
+  @@map("student_master")
+}
+
+model Application {
+  id                                       String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  student_uid                              String                   @unique @db.Text
+  student_first_name                       String                   @db.Text
+  student_last_name                        String                   @db.Text
+  student_email                            String?                  @db.Text
+  student_phone                            String?                  @db.Text
+  student_dob                              DateTime?                @db.Date
+  student_passport_number                  String?                  @db.Text
+  student_nationality                      String?                  @db.Text
+  partner_id                               String?                  @db.Uuid
+  offering_id                              String?                  @db.Uuid
+  workflow_stage                           WorkflowStage?           @default(docs_review)
+  source_application_id                    String?                  @db.Uuid
+  source_portal                            String                   @default("local") @db.Text
+  source_rto_id                            String?                  @db.Uuid
+  source_qualification_code                String?                  @db.Text
+  transferred_at                           DateTime?                @db.Timestamptz(6)
+  transfer_event_id                        String?                  @db.Text
+  payment_status                           PaymentStatus?           @default(unpaid)
+  quoted_tuition                           Decimal?                 @db.Decimal(10, 2)
+  quoted_materials                         Decimal?                 @db.Decimal(10, 2)
+  total_paid                               Decimal?                 @default(0) @db.Decimal(10, 2)
+  appointment_date                         DateTime?                @db.Date
+  appointment_time                         DateTime?                @db.Time(6)
+  submitted_at                             DateTime?                @db.Timestamptz(6)
+  coe_issued_at                            DateTime?                @db.Timestamptz(6)
+  documents                                Json?                    @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  created_by                               String?                  @db.Uuid
+  assigned_to                              String?                  @db.Uuid
+  created_at                               DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime?                @default(now()) @db.Timestamptz(6)
+  assigned_staff_id                        String?                  @db.Uuid
+  locked_by                                String?                  @db.Uuid
+  lock_timestamp                           DateTime?                @db.Timestamptz(6)
+  student_master_id                        String?                  @db.Uuid
+  query_source                             QuerySourceType?
+  query_source_id                          String?                  @db.VarChar(100)
+  lead_source_id                           String?                  @db.Uuid
+  referrer_url                             String?                  @db.Text
+  is_archived                              Boolean?                 @default(false)
+  archived_at                              DateTime?                @db.Timestamptz(6)
+  archived_by                              String?                  @db.Uuid
+  is_deleted                               Boolean?                 @default(false)
+  deleted_at                               DateTime?                @db.Timestamptz(6)
+  deleted_by                               String?                  @db.Uuid
+  student_gender                           String?                  @db.VarChar(20)
+  student_country_of_birth                 String?                  @db.VarChar(100)
+  application_from                         String?                  @db.VarChar(100)
+  student_street_no                        String?                  @db.Text
+  student_suburb                           String?                  @db.VarChar(100)
+  student_state                            String?                  @db.VarChar(50)
+  student_postcode                         String?                  @db.VarChar(20)
+  received_by                              String?                  @db.Uuid
+  received_at                              DateTime?                @db.Timestamptz(6)
+  last_updated_by                          String?                  @db.Uuid
+  notes                                    String?                  @db.Text
+  issue_date                               DateTime?                @db.Date
+  signed_off_by                            String?                  @db.Uuid
+  signed_off_at                            DateTime?                @db.Timestamptz(6)
+  assigned_by                              String?                  @db.Uuid
+  assigned_at                              DateTime?                @db.Timestamptz(6)
+  needs_attention                          Boolean?                 @default(false)
+  ready_to_check                           Boolean?                 @default(false)
+  ready_to_check_at                        DateTime?                @db.Timestamptz(6)
+  docs_prepared_by                         String?                  @db.Uuid
+  docs_prepared_at                         DateTime?                @db.Timestamptz(6)
+  docs_checked_by                          String?                  @db.Uuid
+  docs_checked_at                          DateTime?                @db.Timestamptz(6)
+  docs_approved_by                         String?                  @db.Uuid
+  docs_approved_at                         DateTime?                @db.Timestamptz(6)
+  provider_email                           String?                  @db.VarChar(255)
+  additional_emails                        String[]                 @default([])
+  sent_by                                  String?                  @db.Uuid
+  sent_at                                  DateTime?                @db.Timestamptz(6)
+  delivery_method                          String?                  @db.VarChar(50)
+  delivered_by                             String?                  @db.Uuid
+  delivery_date                            DateTime?                @db.Date
+  tracking_url                             String?                  @db.Text
+  is_delivered                             Boolean?                 @default(false)
+  has_qualifications_docs                  Boolean?                 @default(false)
+  has_id_docs                              Boolean?                 @default(false)
+  has_misc_docs                            Boolean?                 @default(false)
+  student_address                          String?                  @db.Text
+  student_usi                              String?                  @db.VarChar(10)
+  student_visa_number                      String?                  @db.VarChar(50)
+  student_visa_expiry                      DateTime?                @db.Date
+  has_invoice                              Boolean?                 @default(false)
+  latest_invoice_id                        String?                  @db.Uuid
+  invoice_sent_at                          DateTime?                @db.Timestamptz(6)
+  has_bill                                 Boolean?                 @default(false)
+  latest_bill_id                           String?                  @db.Uuid
+  bill_created_at                          DateTime?                @db.Timestamptz(6)
+  lock_timeout                             Unsupported("interval")?
+  assigned_assessor_id                     String?                  @db.Uuid
+  assigned_admin_id                        String?                  @db.Uuid
+  assessor_fee                             Decimal?                 @default(0) @db.Decimal(10, 2)
+  xero_invoice_id                          String?                  @db.VarChar(100)
+  xero_invoice_number                      String?                  @db.VarChar(50)
+  xero_invoice_status                      String?                  @db.VarChar(30)
+  xero_invoice_url                         String?                  @db.VarChar(500)
+  xero_bill_id                             String?                  @db.VarChar(100)
+  xero_bill_number                         String?                  @db.VarChar(50)
+  xero_bill_status                         String?                  @db.VarChar(30)
+  xero_bill_url                            String?                  @db.VarChar(500)
+  xero_last_synced_at                      DateTime?                @db.Timestamptz(6)
+  application_number                       String                   @unique @db.Text
+  workflow_stage_updated_at                DateTime                 @default(now()) @db.Timestamptz(6)
+  qualification_id                         String?                  @db.Uuid
+  admin_applicant_pdf_email_completed      Boolean                  @default(false)
+  admin_applicant_pdf_email_completed_at   DateTime?                @db.Timestamptz(6)
+  admin_applicant_pdf_email_completed_by   String?                  @db.Uuid
+  admin_references_email_completed         Boolean                  @default(false)
+  admin_references_email_completed_at      DateTime?                @db.Timestamptz(6)
+  admin_references_email_completed_by      String?                  @db.Uuid
+  agent_applicant_pdf_email_completed      Boolean                  @default(false)
+  agent_applicant_pdf_email_completed_at   DateTime?                @db.Timestamptz(6)
+  agent_applicant_pdf_email_completed_by   String?                  @db.Uuid
+  agent_references_email_completed         Boolean                  @default(false)
+  agent_references_email_completed_at      DateTime?                @db.Timestamptz(6)
+  agent_references_email_completed_by      String?                  @db.Uuid
+  agent_enrollment_agreement_uploaded      Boolean                  @default(false)
+  agent_enrollment_agreement_uploaded_at   DateTime?                @db.Timestamptz(6)
+  agent_enrollment_agreement_uploaded_by   String?                  @db.Uuid
+  agent_enrollment_agreement_document_id   String?                  @db.Uuid
+  agent_executive_manager_notified         Boolean                  @default(false)
+  agent_executive_manager_notified_at      DateTime?                @db.Timestamptz(6)
+  agent_executive_manager_notified_by      String?                  @db.Uuid
+  assessment_result                        AssessmentResult         @default(pending)
+  assessment_result_at                     DateTime?                @db.Timestamptz(6)
+  assessment_result_by                     String?                  @db.Uuid
+  evaluation_started_at                    DateTime?                @db.Timestamptz(6)
+  evaluation_started_by                    String?                  @db.Uuid
+  assessment_report_date                   DateTime?                @db.Date
+  assessment_report_start_time             DateTime?                @db.Time(6)
+  assessment_report_end_time               DateTime?                @db.Time(6)
+  assessment_report_venue                  String?                  @db.VarChar(50)
+  assessment_report_virtual_platform       String?                  @db.VarChar(50)
+  assessment_report_meeting_record_document_id String?              @db.Uuid
+  assessment_report_outcome                String?                  @db.Text
+  assessment_report_overview               String?                  @db.Text
+  assessment_report_recommendation         String?                  @db.Text
+  assessment_report_completed_at           DateTime?                @db.Timestamptz(6)
+  assessment_report_completed_by           String?                  @db.Uuid
+  dispatch_approval_requested_at           DateTime?                @db.Timestamptz(6)
+  dispatch_approval_requested_by           String?                  @db.Uuid
+  dispatch_approval_approved_at            DateTime?                @db.Timestamptz(6)
+  dispatch_approval_approved_by            String?                  @db.Uuid
+  dispatch_override_used                   Boolean                  @default(false)
+  application_outcome                      ApplicationOutcome       @default(active)
+  agent_frontdesk_notified                 Boolean                  @default(false)
+  agent_frontdesk_notified_at              DateTime?                @db.Timestamptz(6)
+  agent_frontdesk_notified_by              String?                  @db.Uuid
+  admin_accounts_manager_bill_requested    Boolean                  @default(false)
+  admin_accounts_manager_bill_requested_at DateTime?                @db.Timestamptz(6)
+  admin_accounts_manager_bill_requested_by String?                  @db.Uuid
+
+  @@index([workflow_stage], map: "idx_applications_stage")
+  @@index([source_application_id], map: "idx_applications_source_application_id")
+  @@index([source_portal], map: "idx_applications_source_portal")
+  @@index([partner_id], map: "idx_applications_partner")
+  @@index([student_uid], map: "idx_applications_uid")
+  @@index([received_by], map: "idx_applications_received_by")
+  @@index([assigned_by], map: "idx_applications_assigned_by")
+  @@index([archived_by], map: "idx_applications_archived_by")
+  @@index([assigned_staff_id], map: "idx_applications_assigned_staff")
+  @@index([assigned_to], map: "idx_applications_assigned_to")
+  @@index([created_by], map: "idx_applications_created_by")
+  @@index([deleted_by], map: "idx_applications_deleted_by")
+  @@index([delivered_by], map: "idx_applications_delivered_by")
+  @@index([docs_approved_by], map: "idx_applications_docs_approved_by")
+  @@index([docs_checked_by], map: "idx_applications_docs_checked_by")
+  @@index([docs_prepared_by], map: "idx_applications_docs_prepared_by")
+  @@index([last_updated_by], map: "idx_applications_last_updated_by")
+  @@index([latest_bill_id], map: "idx_applications_latest_bill")
+  @@index([latest_invoice_id], map: "idx_applications_latest_invoice")
+  @@index([locked_by], map: "idx_applications_locked_by")
+  @@index([offering_id], map: "idx_applications_offering")
+  @@index([sent_by], map: "idx_applications_sent_by")
+  @@index([signed_off_by], map: "idx_applications_signed_off_by")
+  @@index([student_master_id], map: "idx_applications_student_master")
+  @@index([payment_status], map: "idx_applications_payment_status")
+  @@index([dispatch_approval_requested_by], map: "idx_applications_dispatch_approval_requested_by")
+  @@index([dispatch_approval_approved_by], map: "idx_applications_dispatch_approval_approved_by")
+  @@index([student_email], map: "idx_applications_student_email")
+  @@index([lead_source_id], map: "idx_applications_lead_source_id")
+  @@index([qualification_id], map: "idx_applications_qualification_id")
+  @@map("applications")
+}
+
+model Document {
+  id                      String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id          String?           @db.Uuid
+  partner_id              String?           @db.Uuid
+  document_type           String            @db.VarChar(100)
+  file_name               String            @db.VarChar(255)
+  file_url                String            @db.Text
+  file_size               Int?
+  mime_type               String?           @db.VarChar(100)
+  version                 Int?              @default(1)
+  is_verified             Boolean?          @default(false)
+  verified_by             String?           @db.Uuid
+  verified_at             DateTime?         @db.Timestamptz(6)
+  notes                   String?           @db.Text
+  uploaded_by             String?           @db.Uuid
+  created_at              DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?         @default(now()) @db.Timestamptz(6)
+  is_archived             Boolean?          @default(false)
+  archived_at             DateTime?         @db.Timestamptz(6)
+  archived_by             String?           @db.Uuid
+  is_deleted              Boolean?          @default(false)
+  deleted_at              DateTime?         @db.Timestamptz(6)
+  deleted_by              String?           @db.Uuid
+  extracted_data          Json?             @db.JsonB
+  extraction_status       String?           @default("pending") @db.VarChar(20)
+  extraction_error        String?           @db.Text
+  extracted_at            DateTime?         @db.Timestamptz(6)
+  document_type_validated DocumentTypeEnum?
+  storage_provider        String?           @db.Text
+  storage_bucket          String?           @db.Text
+  storage_key             String?           @db.Text
+  is_remote               Boolean           @default(false)
+  remote_source_url       String?           @db.Text
+  remote_url_expires_at   DateTime?         @db.Timestamptz(6)
+  remote_source_document_id String?         @db.Uuid
+  remote_source_application_id String?      @db.Uuid
+  remote_source_portal    String?           @db.Text
+  remote_download_error   String?           @db.Text
+  copied_to_local_at      DateTime?         @db.Timestamptz(6)
+
+  @@index([application_id], map: "idx_documents_application")
+  @@index([is_remote], map: "idx_documents_is_remote")
+  @@index([partner_id], map: "idx_documents_partner")
+  @@index([verified_by], map: "idx_documents_verified_by")
+  @@index([uploaded_by], map: "idx_documents_uploaded_by")
+  @@index([archived_by], map: "idx_documents_archived_by")
+  @@index([deleted_by], map: "idx_documents_deleted_by")
+  @@index([document_type_validated], map: "idx_documents_type_validated")
+  @@map("documents")
+}
+
+model CertificateRecord {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id       String   @db.Uuid
+  qualification_id     String?  @db.Uuid
+  document_id          String?  @db.Uuid
+  unlocked_document_id String?  @db.Uuid
+  certificate_number   String   @unique @db.VarChar(64)
+  certificate_title    String   @db.Text
+  issue_date           DateTime @db.Date
+  status               String   @default("active") @db.VarChar(20)
+  version              Int      @default(1)
+  includes_transcript  Boolean  @default(false)
+  verification_url     String?  @db.Text
+  request_payload      Json?    @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  generated_by         String?  @db.Uuid
+  generated_at         DateTime @default(now()) @db.Timestamptz(6)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id], map: "idx_certificate_records_application")
+  @@index([qualification_id], map: "idx_certificate_records_qualification")
+  @@index([document_id], map: "idx_certificate_records_document")
+  @@index([unlocked_document_id], map: "idx_certificate_records_unlocked_document")
+  @@index([generated_by], map: "idx_certificate_records_generated_by")
+  @@index([status], map: "idx_certificate_records_status")
+  @@map("certificate_records")
+}
+
+model CertificateUnitResult {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  certificate_id       String   @db.Uuid
+  qualification_unit_id String? @db.Uuid
+  unit_code            String   @db.VarChar(50)
+  unit_title           String   @db.Text
+  result               String   @db.VarChar(30)
+  year                 String   @db.VarChar(4)
+  sort_order           Int      @default(0)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([certificate_id], map: "idx_certificate_unit_results_certificate")
+  @@index([qualification_unit_id], map: "idx_certificate_unit_results_qualification_unit")
+  @@index([sort_order], map: "idx_certificate_unit_results_sort_order")
+  @@map("certificate_unit_results")
+}
+
+model CertificateGenerationJob {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id        String   @db.Uuid
+  certificate_record_id String?  @db.Uuid
+  document_id           String?  @db.Uuid
+  requested_by          String?  @db.Uuid
+  status                String   @default("queued") @db.VarChar(20)
+  certificate_number    String?  @db.VarChar(64)
+  verification_url      String?  @db.Text
+  request_payload       Json?    @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  attempt_count         Int      @default(0)
+  last_error            String?  @db.Text
+  queued_at             DateTime @default(now()) @db.Timestamptz(6)
+  started_at            DateTime? @db.Timestamptz(6)
+  completed_at          DateTime? @db.Timestamptz(6)
+  failed_at             DateTime? @db.Timestamptz(6)
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id], map: "idx_certificate_generation_jobs_application")
+  @@index([certificate_record_id], map: "idx_certificate_generation_jobs_certificate_record")
+  @@index([document_id], map: "idx_certificate_generation_jobs_document")
+  @@index([requested_by], map: "idx_certificate_generation_jobs_requested_by")
+  @@index([status], map: "idx_certificate_generation_jobs_status")
+  @@index([queued_at], map: "idx_certificate_generation_jobs_queued_at")
+  @@map("certificate_generation_jobs")
+}
+
+model AuditLog {
+  id         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?              @db.Uuid
+  action     String               @db.VarChar(50)
+  table_name String               @db.VarChar(100)
+  record_id  String?              @db.Uuid
+  old_data   Json?                @db.JsonB
+  new_data   Json?                @db.JsonB
+  ip_address Unsupported("inet")?
+  user_agent String?              @db.Text
+  created_at DateTime?            @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id], map: "idx_audit_logs_user")
+  @@index([table_name], map: "idx_audit_logs_table")
+  @@index([created_at], map: "idx_audit_logs_created")
+  @@map("audit_logs")
+}
+
+model Ticket {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subject        String          @db.VarChar(255)
+  description    String?         @db.Text
+  status         TicketStatus?   @default(open)
+  priority       TicketPriority? @default(normal)
+  application_id String?         @db.Uuid
+  partner_id     String?         @db.Uuid
+  created_by     String?         @db.Uuid
+  assigned_to    String?         @db.Uuid
+  resolved_at    DateTime?       @db.Timestamptz(6)
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime?       @default(now()) @db.Timestamptz(6)
+
+  @@index([status], map: "idx_tickets_status")
+  @@index([assigned_to], map: "idx_tickets_assigned")
+  @@index([application_id], map: "idx_tickets_application")
+  @@index([created_by], map: "idx_tickets_created_by")
+  @@index([partner_id], map: "idx_tickets_partner")
+  @@map("tickets")
+}
+
+model TicketComment {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticket_id   String?   @db.Uuid
+  user_id     String?   @db.Uuid
+  content     String    @db.Text
+  is_internal Boolean?  @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([ticket_id], map: "idx_ticket_comments_ticket")
+  @@index([user_id], map: "idx_ticket_comments_user")
+  @@map("ticket_comments")
+}
+
+model ApplicationComment {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String?   @db.Uuid
+  user_id        String?   @db.Uuid
+  content        String    @db.Text
+  is_internal    Boolean?  @default(false)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id], map: "idx_application_comments_app")
+  @@index([user_id], map: "idx_application_comments_user")
+  @@map("application_comments")
+}
+
+model ApplicationHistory {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String?   @db.Uuid
+  from_stage     String?   @db.VarChar(50)
+  to_stage       String    @db.VarChar(50)
+  changed_by     String?   @db.Uuid
+  notes          String?   @db.Text
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id], map: "idx_application_history_app")
+  @@index([changed_by], map: "idx_application_history_changed_by")
+  @@map("application_history")
+}
+
+model EmailTemplate {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @unique @db.VarChar(100)
+  subject     String    @db.VarChar(255)
+  body        String    @db.Text
+  variables   String[]  @default([])
+  is_active   Boolean?  @default(true)
+  created_by  String?   @db.Uuid
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+  is_archived Boolean?  @default(false)
+  archived_at DateTime? @db.Timestamptz(6)
+  archived_by String?   @db.Uuid
+  is_deleted  Boolean?  @default(false)
+  deleted_at  DateTime? @db.Timestamptz(6)
+  deleted_by  String?   @db.Uuid
+
+  @@index([created_by], map: "idx_email_templates_created_by")
+  @@index([archived_by], map: "idx_email_templates_archived_by")
+  @@index([deleted_by], map: "idx_email_templates_deleted_by")
+  @@map("email_templates")
+}
+
+model PriceVersion {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  offering_id          String?   @db.Uuid
+  tuition_fee_onshore  Decimal?  @db.Decimal(10, 2)
+  tuition_fee_offshore Decimal?  @db.Decimal(10, 2)
+  material_fee         Decimal?  @db.Decimal(10, 2)
+  application_fee      Decimal?  @db.Decimal(10, 2)
+  effective_from       DateTime  @db.Date
+  effective_to         DateTime? @db.Date
+  approved_by          String?   @db.Uuid
+  approval_notes       String?   @db.Text
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([approved_by], map: "idx_price_versions_approved_by")
+  @@index([offering_id], map: "idx_price_versions_offering")
+  @@map("price_versions")
+}
+
+model Invoice {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoice_number    String    @unique @db.VarChar(20)
+  application_id    String?   @db.Uuid
+  partner_id        String?   @db.Uuid
+  student_name      String    @db.VarChar(255)
+  course_name       String?   @db.VarChar(255)
+  rto_name          String?   @db.VarChar(255)
+  tuition_fee       Decimal?  @default(0) @db.Decimal(10, 2)
+  material_fee      Decimal?  @default(0) @db.Decimal(10, 2)
+  application_fee   Decimal?  @default(0) @db.Decimal(10, 2)
+  other_fees        Decimal?  @default(0) @db.Decimal(10, 2)
+  discount          Decimal?  @default(0) @db.Decimal(10, 2)
+  total_amount      Decimal   @db.Decimal(10, 2)
+  status            String?   @default("draft") @db.VarChar(20)
+  due_date          DateTime? @db.Date
+  paid_at           DateTime? @db.Timestamptz(6)
+  pdf_url           String?   @db.Text
+  notes             String?   @db.Text
+  created_by        String?   @db.Uuid
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+  is_archived       Boolean?  @default(false)
+  archived_at       DateTime? @db.Timestamptz(6)
+  archived_by       String?   @db.Uuid
+  is_deleted        Boolean?  @default(false)
+  deleted_at        DateTime? @db.Timestamptz(6)
+  deleted_by        String?   @db.Uuid
+  invoice_type      String?   @default("customer") @db.VarChar(20)
+  tax_rate          Decimal?  @default(10) @db.Decimal(5, 2)
+  tax_amount        Decimal?  @default(0) @db.Decimal(10, 2)
+  subtotal          Decimal?  @db.Decimal(10, 2)
+  payment_reference String?   @db.VarChar(100)
+  payment_method    String?   @db.VarChar(50)
+  sent_at           DateTime? @db.Timestamptz(6)
+  sent_to           String?   @db.VarChar(255)
+  sent_via          String?   @db.VarChar(20)
+  send_count        Int?      @default(0)
+  issue_date        DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  xero_invoice_id   String?   @db.VarChar(100)
+  xero_invoice_url  String?   @db.VarChar(500)
+  xero_sent_at      DateTime? @db.Timestamptz(6)
+  xero_status       String?   @db.VarChar(30)
+
+  @@index([application_id], map: "idx_invoices_application")
+  @@index([partner_id], map: "idx_invoices_partner")
+  @@index([status], map: "idx_invoices_status")
+  @@index([created_by], map: "idx_invoices_created_by")
+  @@index([archived_by], map: "idx_invoices_archived_by")
+  @@index([deleted_by], map: "idx_invoices_deleted_by")
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoice_id  String    @db.Uuid
+  description String    @db.VarChar(255)
+  quantity    Int?      @default(1)
+  unit_price  Decimal   @db.Decimal(10, 2)
+  total       Decimal   @db.Decimal(10, 2)
+  sort_order  Int?      @default(0)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([invoice_id], map: "idx_invoice_line_items_invoice")
+  @@map("invoice_line_items")
+}
+
+model Bill {
+  id                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bill_number        String      @unique @db.VarChar(20)
+  rto_id             String?     @db.Uuid
+  application_id     String?     @db.Uuid
+  description        String?     @db.Text
+  rto_invoice_number String?     @db.VarChar(100)
+  tuition_cost       Decimal?    @default(0) @db.Decimal(10, 2)
+  material_cost      Decimal?    @default(0) @db.Decimal(10, 2)
+  other_costs        Decimal?    @default(0) @db.Decimal(10, 2)
+  total_amount       Decimal     @db.Decimal(10, 2)
+  status             BillStatus? @default(pending)
+  due_date           DateTime?   @db.Date
+  paid_at            DateTime?   @db.Timestamptz(6)
+  payment_reference  String?     @db.VarChar(100)
+  payment_method     String?     @db.VarChar(50)
+  is_archived        Boolean?    @default(false)
+  archived_at        DateTime?   @db.Timestamptz(6)
+  archived_by        String?     @db.Uuid
+  is_deleted         Boolean?    @default(false)
+  deleted_at         DateTime?   @db.Timestamptz(6)
+  deleted_by         String?     @db.Uuid
+  notes              String?     @db.Text
+  created_by         String?     @db.Uuid
+  created_at         DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?   @default(now()) @db.Timestamptz(6)
+  xero_bill_id       String?     @db.VarChar(100)
+  xero_bill_url      String?     @db.VarChar(500)
+  xero_status        String?     @db.VarChar(30)
+
+  @@index([rto_id], map: "idx_bills_rto")
+  @@index([application_id], map: "idx_bills_application")
+  @@index([status], map: "idx_bills_status")
+  @@index([due_date], map: "idx_bills_due_date")
+  @@index([archived_by], map: "idx_bills_archived_by")
+  @@index([created_by], map: "idx_bills_created_by")
+  @@index([deleted_by], map: "idx_bills_deleted_by")
+  @@map("bills")
+}
+
+model BillLineItem {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bill_id     String    @db.Uuid
+  description String    @db.VarChar(255)
+  quantity    Int?      @default(1)
+  unit_price  Decimal   @db.Decimal(10, 2)
+  total       Decimal   @db.Decimal(10, 2)
+  sort_order  Int?      @default(0)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([bill_id], map: "idx_bill_line_items_bill")
+  @@map("bill_line_items")
+}
+
+model BulkOperation {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type            BulkOperationType
+  status          BulkOperationStatus? @default(pending)
+  total_items     Int?                 @default(0)
+  processed_items Int?                 @default(0)
+  failed_items    Int?                 @default(0)
+  error_log       Json?                @default(dbgenerated("'[]'::jsonb")) @db.JsonB
+  created_by      String?              @db.Uuid
+  created_at      DateTime?            @default(now()) @db.Timestamptz(6)
+  completed_at    DateTime?            @db.Timestamptz(6)
+
+  @@index([created_by], map: "idx_bulk_operations_created_by")
+  @@map("bulk_operations")
+}
+
+model NotificationQueue {
+  id             String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  channel        NotificationChannel
+  recipient      String              @db.VarChar(255)
+  subject        String?             @db.VarChar(255)
+  body           String              @db.Text
+  application_id String?             @db.Uuid
+  partner_id     String?             @db.Uuid
+  template_id    String?             @db.Uuid
+  status         NotificationStatus? @default(pending)
+  scheduled_at   DateTime?           @default(now()) @db.Timestamptz(6)
+  sent_at        DateTime?           @db.Timestamptz(6)
+  error_message  String?             @db.Text
+  retry_count    Int?                @default(0)
+  max_retries    Int?                @default(3)
+  metadata       Json?               @db.JsonB
+  created_by     String?             @db.Uuid
+  created_at     DateTime?           @default(now()) @db.Timestamptz(6)
+  invoice_id     String?             @db.Uuid
+  bill_id        String?             @db.Uuid
+
+  @@index([status], map: "idx_notification_queue_status")
+  @@index([scheduled_at], map: "idx_notification_queue_scheduled")
+  @@index([application_id], map: "idx_notification_queue_application")
+  @@index([created_by], map: "idx_notification_queue_created_by")
+  @@index([partner_id], map: "idx_notification_queue_partner")
+  @@index([template_id], map: "idx_notification_queue_template")
+  @@map("notification_queue")
+}
+
+model NotificationLog {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  notification_id     String?             @db.Uuid
+  channel             NotificationChannel
+  recipient           String              @db.VarChar(255)
+  subject             String?             @db.VarChar(255)
+  status              NotificationStatus
+  provider_message_id String?             @db.VarChar(255)
+  provider_response   Json?               @db.JsonB
+  created_at          DateTime?           @default(now()) @db.Timestamptz(6)
+  sent_by             String?             @db.Uuid
+  recipient_name      String?             @db.VarChar(255)
+  invoice_id          String?             @db.Uuid
+  bill_id             String?             @db.Uuid
+  message_type        String?             @db.VarChar(50)
+
+  @@index([sent_by], map: "idx_notification_logs_sent_by")
+  @@index([notification_id], map: "idx_notification_logs_notification")
+  @@map("notification_logs")
+}
+
+model ScheduledReminder {
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                 String              @db.VarChar(100)
+  description          String?             @db.Text
+  trigger_type         String              @db.VarChar(50)
+  trigger_config       Json                @db.JsonB
+  notification_channel NotificationChannel
+  template_id          String?             @db.Uuid
+  custom_message       String?             @db.Text
+  status               ReminderStatus?     @default(active)
+  last_run_at          DateTime?           @db.Timestamptz(6)
+  next_run_at          DateTime?           @db.Timestamptz(6)
+  created_by           String?             @db.Uuid
+  created_at           DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?           @default(now()) @db.Timestamptz(6)
+
+  @@index([created_by], map: "idx_scheduled_reminders_created_by")
+  @@index([template_id], map: "idx_scheduled_reminders_template")
+  @@map("scheduled_reminders")
+}
+
+model ReminderHistory {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reminder_id     String?   @db.Uuid
+  application_id  String?   @db.Uuid
+  notification_id String?   @db.Uuid
+  triggered_at    DateTime? @default(now()) @db.Timestamptz(6)
+  notes           String?   @db.Text
+
+  @@index([application_id], map: "idx_reminder_history_application")
+  @@index([notification_id], map: "idx_reminder_history_notification")
+  @@index([reminder_id], map: "idx_reminder_history_reminder")
+  @@map("reminder_history")
+}
+
+model LeadSource {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String          @db.VarChar(100)
+  source_type     QuerySourceType
+  identifier      String?         @db.VarChar(100)
+  description     String?         @db.Text
+  is_active       Boolean?        @default(true)
+  total_leads     Int?            @default(0)
+  conversion_rate Decimal?        @db.Decimal(5, 2)
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?       @default(now()) @db.Timestamptz(6)
+
+  @@map("lead_sources")
+}
+
+model AdminImpersonationLog {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_id             String               @db.Uuid
+  impersonated_user_id String               @db.Uuid
+  reason               String               @db.Text
+  started_at           DateTime?            @default(now()) @db.Timestamptz(6)
+  ended_at             DateTime?            @db.Timestamptz(6)
+  ip_address           Unsupported("inet")?
+  user_agent           String?              @db.Text
+  actions_count        Int?                 @default(0)
+
+  @@index([admin_id], map: "idx_impersonation_admin")
+  @@index([impersonated_user_id], map: "idx_admin_impersonation_logs_impersonated_user")
+  @@map("admin_impersonation_logs")
+}
+
+model WorkflowTransition {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  from_stage        WorkflowStage
+  to_stage          WorkflowStage
+  is_allowed        Boolean       @default(true)
+  requires_approval Boolean       @default(false)
+  required_role     UserRole?
+  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  allowed_roles     String[]      @default([])
+
+  @@unique([from_stage, to_stage], map: "workflow_transitions_from_stage_to_stage_key")
+  @@map("workflow_transitions")
+}
+
+model RecordVersion {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  table_name     String    @db.VarChar(100)
+  record_id      String    @db.Uuid
+  version_number Int
+  data           Json      @db.JsonB
+  changed_fields String[]  @default([])
+  change_type    String    @db.VarChar(20)
+  changed_by     String?   @db.Uuid
+  change_reason  String?   @db.Text
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([table_name, record_id, version_number], map: "record_versions_table_name_record_id_version_number_key")
+  @@index([table_name, record_id], map: "idx_record_versions_table_record")
+  @@index([changed_by], map: "idx_record_versions_user")
+  @@map("record_versions")
+}
+
+model RecordActivity {
+  id         String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  table_name String               @db.VarChar(100)
+  record_id  String               @db.Uuid
+  action     String               @db.VarChar(50)
+  summary    String               @db.Text
+  details    Json?                @db.JsonB
+  user_id    String?              @db.Uuid
+  user_name  String?              @db.Text
+  ip_address Unsupported("inet")?
+  user_agent String?              @db.Text
+  created_at DateTime?            @default(now()) @db.Timestamptz(6)
+
+  @@index([table_name, record_id], map: "idx_record_activity_table_record")
+  @@index([user_id], map: "idx_record_activity_user")
+  @@index([action], map: "idx_record_activity_action")
+  @@map("record_activity")
+}
+
+model RolePermission {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role           String
+  permission_key String
+  granted        Boolean  @default(false)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([role, permission_key], map: "idx_role_permissions_role_permission")
+  @@index([role], map: "idx_role_permissions_role")
+  @@index([permission_key], map: "idx_role_permissions_permission_key")
+  @@map("role_permissions")
+}
+
+model RoleHiddenField {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role       UserRole
+  field_name String   @db.Text
+  context    String   @default("application") @db.Text
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([role, field_name, context], map: "role_hidden_fields_role_field_name_context_key")
+  @@index([role], map: "idx_role_hidden_fields_role")
+  @@index([context], map: "idx_role_hidden_fields_context")
+  @@map("role_hidden_fields")
+}
+
+model QualificationUnit {
+  id                 String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  qualification_id   String    @db.Uuid
+  unit_code          String    @db.Text
+  unit_title         String    @db.Text
+  unit_type          String?   @db.Text
+  field_of_education String?   @db.Text
+  nominal_hours      Int?
+  is_current         Boolean?  @default(true)
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([qualification_id, unit_code], map: "qualification_units_qualification_id_unit_code_key")
+  @@index([qualification_id], map: "idx_qualification_units_qual")
+  @@index([unit_code], map: "idx_qualification_units_code")
+  @@index([unit_type], map: "idx_qualification_units_type")
+  @@map("qualification_units")
+}
+
+model TgaSyncLog {
+  id               String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  qualification_id String?    @db.Uuid
+  sync_result      SyncResult
+  changes_detected Json?      @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  api_response     Json?      @db.JsonB
+  error_message    String?    @db.Text
+  synced_by        String?    @db.Uuid
+  created_at       DateTime?  @default(now()) @db.Timestamptz(6)
+
+  @@index([qualification_id], map: "idx_tga_sync_log_qual")
+  @@index([sync_result], map: "idx_tga_sync_log_result")
+  @@index([synced_by], map: "idx_tga_sync_log_synced_by")
+  @@map("tga_sync_log")
+}
+
+model PartnerContactHistory {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id   String         @db.Uuid
+  channel      ContactChannel
+  subject      String?        @db.VarChar(255)
+  content      String?        @db.Text
+  contacted_by String?        @db.Uuid
+  contacted_at DateTime?      @default(now()) @db.Timestamptz(6)
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+
+  @@index([partner_id], map: "idx_partner_contact_history_partner")
+  @@index([contacted_by], map: "idx_partner_contact_history_contacted_by")
+  @@map("partner_contact_history")
+}
+
+model PartnerReminder {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id    String    @db.Uuid
+  reminder_type String    @db.VarChar(50)
+  template_id   String?   @db.Uuid
+  days_before   Int       @default(7)
+  is_active     Boolean?  @default(true)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([partner_id], map: "idx_partner_reminders_partner")
+  @@index([template_id], map: "idx_partner_reminders_template")
+  @@map("partner_reminders")
+}
+
+model DocumentRequestLink {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id      String    @db.Uuid
+  token           String    @unique @db.VarChar(64)
+  document_types  String[]
+  notes           String?   @db.Text
+  expires_at      DateTime? @db.Timestamptz(6)
+  max_uploads     Int?
+  current_uploads Int?      @default(0)
+  is_active       Boolean?  @default(true)
+  created_by      String?   @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([partner_id], map: "idx_document_request_links_partner")
+  @@index([created_by], map: "idx_document_request_links_created_by")
+  @@map("document_request_links")
+}
+
+model PartnerCommissionRule {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partner_id       String    @db.Uuid
+  name             String    @db.VarChar(100)
+  qualification_id String?   @db.Uuid
+  min_volume       Int?
+  max_volume       Int?
+  commission_rate  Decimal   @db.Decimal(5, 2)
+  effective_from   DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  effective_to     DateTime? @db.Date
+  is_active        Boolean?  @default(true)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([partner_id], map: "idx_partner_commission_rules_partner")
+  @@index([qualification_id], map: "idx_partner_commission_rules_qualification")
+  @@map("partner_commission_rules")
+}
+
+model AssessorQualification {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  assessor_id      String    @db.Uuid
+  qualification_id String    @db.Uuid
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([assessor_id, qualification_id], map: "assessor_qualifications_assessor_id_qualification_id_key")
+  @@index([assessor_id], map: "idx_assessor_qualifications_assessor")
+  @@index([qualification_id], map: "idx_assessor_qualifications_qual")
+  @@map("assessor_qualifications")
+}
+
+model Notification {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String           @db.Uuid
+  type          NotificationType
+  title         String           @db.VarChar(255)
+  message       String           @db.Text
+  related_table String?          @db.VarChar(100)
+  related_id    String?          @db.Uuid
+  metadata      Json?            @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  is_read       Boolean?         @default(false)
+  read_at       DateTime?        @db.Timestamptz(6)
+  priority      String?          @default("normal") @db.VarChar(20)
+  created_at    DateTime?        @default(now()) @db.Timestamptz(6)
+  expires_at    DateTime?        @db.Timestamptz(6)
+
+  @@index([user_id], map: "idx_notifications_user_id")
+  @@index([type], map: "idx_notifications_type")
+  @@index([related_table, related_id], map: "idx_notifications_related")
+  @@map("notifications")
+}
+
+model PortalConnection {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  integration_key           String    @unique @db.Text
+  sharp_future_base_url     String?   @db.Text
+  sharp_future_rto_id       String?   @db.Uuid
+  transfer_secret_encrypted String?   @db.Text
+  public_portal_url         String?   @db.Text
+  webhook_receive_url       String?   @db.Text
+  connection_status         String    @default("disconnected") @db.Text
+  is_enabled                Boolean   @default(false)
+  last_connected_at         DateTime? @db.Timestamptz(6)
+  last_ping_at              DateTime? @db.Timestamptz(6)
+  created_by                String?   @db.Uuid
+  updated_by                String?   @db.Uuid
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@map("portal_connections")
+}
+
+model SharpFutureEventDelivery {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String    @unique @db.Text
+  application_id  String?   @db.Uuid
+  event_type      String    @db.Text
+  payload         Json      @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  delivery_status String    @default("pending") @db.Text
+  last_attempt_at DateTime? @db.Timestamptz(6)
+  delivered_at    DateTime? @db.Timestamptz(6)
+  error_message   String?   @db.Text
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id, created_at], map: "idx_sharp_future_event_deliveries_application")
+  @@index([delivery_status, created_at], map: "idx_sharp_future_event_deliveries_status")
+  @@map("sharp_future_event_deliveries")
+}
+
+model NotificationPreference {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                    String    @unique @db.Uuid
+  email_enabled              Boolean?  @default(true)
+  email_frequency            String?   @default("instant") @db.VarChar(20)
+  in_app_application_updates Boolean?  @default(true)
+  in_app_documents           Boolean?  @default(true)
+  in_app_comments            Boolean?  @default(true)
+  in_app_payments            Boolean?  @default(true)
+  in_app_reminders           Boolean?  @default(true)
+  in_app_system              Boolean?  @default(true)
+  email_application_updates  Boolean?  @default(true)
+  email_documents            Boolean?  @default(false)
+  email_comments             Boolean?  @default(false)
+  email_payments             Boolean?  @default(true)
+  email_reminders            Boolean?  @default(true)
+  email_system               Boolean?  @default(true)
+  quiet_hours_enabled        Boolean?  @default(false)
+  quiet_hours_start          DateTime? @default(dbgenerated("'22:00:00'::time")) @db.Time(6)
+  quiet_hours_end            DateTime? @default(dbgenerated("'07:00:00'::time")) @db.Time(6)
+  created_at                 DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("notification_preferences")
+}
+
+model XeroConnection {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  access_token      String    @db.Text
+  refresh_token     String    @db.Text
+  token_expires_at  DateTime  @db.Timestamptz(6)
+  token_type        String?   @default("Bearer") @db.VarChar(50)
+  tenant_id         String    @db.VarChar(100)
+  tenant_name       String?   @db.VarChar(255)
+  tenant_type       String?   @db.VarChar(50)
+  scopes            String[]
+  connected_at      DateTime? @default(now()) @db.Timestamptz(6)
+  connected_by      String?   @db.Uuid
+  is_active         Boolean?  @default(true)
+  last_refreshed_at DateTime? @db.Timestamptz(6)
+  last_sync_at      DateTime? @db.Timestamptz(6)
+  last_error        String?   @db.Text
+  last_error_at     DateTime? @db.Timestamptz(6)
+  error_count       Int?      @default(0)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@map("xero_connection")
+}
+
+model XeroEntityMap {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entity_type    String    @db.VarChar(50)
+  lumiere_id     String    @db.Uuid
+  xero_id        String    @db.VarChar(100)
+  xero_number    String?   @db.VarChar(50)
+  xero_url       String?   @db.VarChar(500)
+  sync_status    String?   @default("synced") @db.VarChar(20)
+  sync_direction String?   @default("push") @db.VarChar(10)
+  last_synced_at DateTime? @default(now()) @db.Timestamptz(6)
+  sync_error     String?   @db.Text
+  sync_attempts  Int?      @default(0)
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([entity_type, lumiere_id], map: "xero_entity_map_unique")
+  @@index([xero_id], map: "idx_xero_entity_map_xero_id")
+  @@index([entity_type, lumiere_id], map: "idx_xero_entity_map_lumiere")
+  @@map("xero_entity_map")
+}
+
+model WorkflowTransitionEvent {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String   @db.Uuid
+  from_stage     String   @db.Text
+  to_stage       String   @db.Text
+  actor_id       String?  @db.Uuid
+  notes          String?  @db.Text
+  metadata       Json     @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id, created_at], map: "idx_workflow_transition_events_application")
+  @@map("workflow_transition_events")
+}
+
+model WorkflowAlert {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String    @db.Uuid
+  alert_type     String    @db.Text
+  severity       String    @default("normal") @db.Text
+  title          String    @db.Text
+  message        String?   @db.Text
+  status         String    @default("open") @db.Text
+  raised_by      String?   @db.Uuid
+  resolved_by    String?   @db.Uuid
+  resolved_at    DateTime? @db.Timestamptz(6)
+  metadata       Json      @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id, created_at], map: "idx_workflow_alerts_application")
+  @@index([status, severity], map: "idx_workflow_alerts_status")
+  @@map("workflow_alerts")
+}
+
+model WorkflowAssignment {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id String    @db.Uuid
+  stage          String    @db.Text
+  assignee_id    String    @db.Uuid
+  assigned_by    String?   @db.Uuid
+  is_active      Boolean   @default(true)
+  assigned_at    DateTime  @default(now()) @db.Timestamptz(6)
+  unassigned_at  DateTime? @db.Timestamptz(6)
+  metadata       Json      @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+
+  @@index([application_id, stage, is_active], map: "idx_workflow_assignments_lookup")
+  @@map("workflow_assignments")
+}
+
+model WorkflowTransitionApproval {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id   String    @db.Uuid
+  from_stage       String    @db.Text
+  to_stage         String    @db.Text
+  status           String    @default("pending") @db.Text
+  required_role    String?   @db.Text
+  requested_by     String    @db.Uuid
+  requested_at     DateTime  @default(now()) @db.Timestamptz(6)
+  reviewed_by      String?   @db.Uuid
+  reviewed_at      DateTime? @db.Timestamptz(6)
+  transition_notes String?   @db.Text
+  review_notes     String?   @db.Text
+  executed_at      DateTime? @db.Timestamptz(6)
+  metadata         Json      @default(dbgenerated("'{}'::jsonb")) @db.JsonB
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([application_id, requested_at], map: "idx_workflow_transition_approvals_application")
+  @@index([status, required_role], map: "idx_workflow_transition_approvals_status")
+  @@map("workflow_transition_approvals")
+}

@@ -1,0 +1,14 @@
+-- Optional SQL Phase 6
+-- Intentionally not auto-applied.
+--
+-- The old Supabase schema used a partitioned `audit_trail` design that does not
+-- align cleanly with Prisma ownership. If you want that behavior restored, port
+-- the final audited partitioning SQL from:
+-- - supabase/migrations/legacy/legacy_025_audit_consolidation.sql
+-- - supabase/migrations/legacy/legacy_026_audit_partitioning.sql
+-- - supabase/migrations/legacy/legacy_029_security_fixes.sql
+-- - supabase/migrations/legacy/legacy_030_function_search_path.sql
+-- - supabase/migrations/legacy/legacy_031_rls_performance_fix.sql
+--
+-- Recommended default: leave audit partitioning out unless you explicitly need
+-- the historical partitioned audit behavior in production.

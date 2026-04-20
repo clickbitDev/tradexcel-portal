@@ -1,0 +1,68 @@
+-- RTOs Import
+-- Generated at 2026-01-16T10:12:07.553Z
+-- Total: 51 RTOs
+
+INSERT INTO rtos (code, name, phone, email, status, tga_sync_status, tga_last_synced_at)
+VALUES
+  ('00000', 'Dead College', '0401959717', 'tanvir@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('191919', 'RinZin IT', '+61450638244', 'info@rinzinit.com.au', 'active', 'synced', NOW()),
+  ('21244', 'Frontier Institute of Technology', '0420 918 783', 'info@qualifyfirst.com.au', 'active', 'synced', NOW()),
+  ('22450', 'Bard College', '425 383 099', 'noemail@gmail.com', 'active', 'synced', NOW()),
+  ('22604', 'ATTN', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('30979', 'Building Trades Australia', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('31486', 'Synergy Central', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('31518', 'Nomi College', '0415 210 981', 'admin@atsrpl.com.au', 'pending', 'synced', NOW()),
+  ('31718', 'Asset Training Australia', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('32314', 'AIHBM', '0431 325 629', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('32373', 'Skills Recognition International', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('40055', 'Colour Cosmetica Academy Pty Ltd', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('40393', 'Nationwide Academy', '0483 943 219', 'submission@studyin.com.au', 'active', 'synced', NOW()),
+  ('40797', 'Tred Consultants Pty Ltd', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('40909', 'Australian Massage & Beauty Institute (AMBI)', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('41058', 'Maple Ridge College Australia', '0431 325 629', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('41138', 'Brighton Pacific Pty Ltd', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('41487', 'AIBT', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('41517', 'Swiss Institute Australia', '0483 943 219', 'submission@studyin.com.au', 'inactive', 'synced', NOW()),
+  ('4444', 'Local host', 'wqsdfgsdghs', '2eaee@example.com', 'active', 'synced', NOW()),
+  ('45104', 'Novus Health Institute', '0431 325 629', 'info@vetaaustralia.com.au', 'active', 'synced', NOW()),
+  ('45114', 'APMI', '0410 551 541', 'creditfe@gmail.com', 'active', 'synced', NOW()),
+  ('45197', 'SCBM', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45210', 'AATSA', '0426 053 447', 'jinto.mani@acmcollege.edu.au', 'active', 'synced', NOW()),
+  ('45239', 'ACMC', '0426 053 447', 'jinto.mani@acmcollege.edu.au', 'active', 'synced', NOW()),
+  ('45254', 'Career Skills Australia Pty Ltd', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('45341', 'Trade Xcel Institute', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45453', 'Nexus Institute of Australia', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('45467', 'Sydney Management & Travel Academy', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45665', 'Cove Institute of Business & Trade', '0451 877 056', 'info@oceaniaservices.com', 'active', 'synced', NOW()),
+  ('45705', 'Austec College', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('45756', 'Australian Business Skills College', '0451 008 088', 'admin@holoedu.com.au', 'active', 'synced', NOW()),
+  ('45760', 'YSCI', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45786', 'Sydney Gateway College', '0431 325 629', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45818', 'Edward Business College', '0451 067 346', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('45857', 'UIE', '0493 708 581', 'info@uie.edu.auxxx', 'active', 'synced', NOW()),
+  ('45871', 'Australian Educare College', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('45885', 'Atlas College', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('45908', 'National Property College', '0403 797 897', 'm.studyverse@gmail.com', 'active', 'synced', NOW()),
+  ('45951', 'Prosper Training', '+61 424 383 457', 'certification@rplqualifications.com.au', 'active', 'synced', NOW()),
+  ('46027', 'Infinity Business College', '0426 053 447', 'jinto.mani@acmcollege.edu.au', 'active', 'synced', NOW()),
+  ('46136', 'Labour Care Training', '0424 852 345', 'info@pleasantedu.com.au', 'active', 'synced', NOW()),
+  ('46185', 'Eduwire', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('46252', 'Elite Institute and Technology', '0415 210 981', 'admin@atsrpl.com.au', 'active', 'synced', NOW()),
+  ('46254', 'ACTS', '0405 018 473', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('46272', 'Australian Trade and Technical College', '0451 008 088', 'admin@holoedu.com.au', 'active', 'synced', NOW()),
+  ('46359', 'AVM Skills Institute', '0426 053 447', 'jinto.mani@acmcollege.edu.au', 'active', 'synced', NOW()),
+  ('52690', 'Micon Training', '0451 008 088', 'admin@holoedu.com.au', 'active', 'synced', NOW()),
+  ('7112', 'Quantum Training', '0413 322 973', 'certification@rplqualifications.com.au', 'active', 'synced', NOW()),
+  ('91503', 'MUSS', '0401 959 717', 'info@lumieresolutions.com.au', 'active', 'synced', NOW()),
+  ('NA', 'Berega', '0435 939 293', 'gofur_Check@gmail.com', 'active', 'synced', NOW())
+ON CONFLICT (code) DO UPDATE SET
+  name = EXCLUDED.name,
+  phone = EXCLUDED.phone,
+  email = EXCLUDED.email,
+  status = EXCLUDED.status,
+  tga_sync_status = 'synced',
+  tga_last_synced_at = NOW(),
+  updated_at = NOW();
+
+-- Verify import
+SELECT COUNT(*) as total_rtos FROM rtos;
