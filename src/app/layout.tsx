@@ -37,6 +37,11 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: BRAND_METADATA_TITLE,
   description: BRAND_METADATA_DESCRIPTION,
+  icons: {
+    icon: '/tradexcel_logo_symbol.png',
+    shortcut: '/tradexcel_logo_symbol.png',
+    apple: '/tradexcel_logo_symbol.png',
+  },
 };
 
 export default function RootLayout({
